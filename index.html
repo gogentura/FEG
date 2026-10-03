@@ -1057,8 +1057,9 @@
 </div>
 
 
-<script src="rating.js"></script>
 <script src="brain.js"></script>
+<script src="rating.js"></script>
+<script src="learning_controller.js"></script>
 
 
 <script>
@@ -4652,6 +4653,113 @@ setInterval(
 
     },
     FEG_FACT_REFRESH_MS
+);
+
+
+/* ============================================================
+   FEG LEARNING AUTO-TRIGGER
+   ============================================================
+ *
+ * Запускает Learning Controller:
+ *
+ *   1. после загрузки страницы;
+ *   2. после каждого обновления фактов;
+ *   3. периодически, вместе с живой памятью.
+ *
+ * Controller сам проверяет, есть ли новые факты.
+ * Повторная обработка одного факта невозможна,
+ * потому что Controller хранит обработанные learning ID.
+ */
+
+function runFEGLearningController() {
+
+    if (!window.FEGLearning) {
+
+        console.warn(
+            "[FEG Learning] Controller not loaded."
+        );
+
+        return;
+
+    }
+
+
+    try {
+
+        const result =
+            window.FEGLearning
+                .processFinishedPredictions();
+
+
+        console.log(
+            "[FEG Learning] processed:",
+            result
+        );
+
+
+        /*
+         * Если на странице есть элемент
+         * для статуса Brain/Learning — обновляем его.
+         */
+
+        if (
+            typeof window.renderLearningStatus ===
+            "function"
+        ) {
+
+            window.renderLearningStatus(
+                window.FEGLearning.getStatus()
+            );
+
+        }
+
+    } catch (error) {
+
+        console.error(
+            "[FEG Learning] Controller error:",
+            error
+        );
+
+    }
+
+}
+
+
+/*
+ * Первый запуск.
+ *
+ * DOMContentLoaded может сработать раньше,
+ * чем скрипты brain.js / rating.js /
+ * learning_controller.js успеют выполниться.
+ * Поэтому подстраховываемся setTimeout.
+ */
+
+document.addEventListener(
+    "DOMContentLoaded",
+    function () {
+
+        setTimeout(
+            runFEGLearningController,
+            500
+        );
+
+    },
+    { once: true }
+);
+
+
+/*
+ * Повторная проверка.
+ *
+ * Это НЕ создаёт новые факты.
+ *
+ * Controller только ищет факты,
+ * которые появились в Prediction Journal.
+ */
+
+setInterval(
+    runFEGLearningController,
+    5 * 60 * 1000
 );
 
 
