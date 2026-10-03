@@ -130,7 +130,9 @@
             background: #5b6cff;
             font-weight: 800;
             cursor: pointer;
-            transition: transform .12s ease, opacity .12s ease;
+            transition:
+                transform .12s ease,
+                opacity .12s ease;
         }
 
         button:hover {
@@ -156,6 +158,23 @@
             margin-top: 10px;
             background: #3a2028;
             color: #ffb4bd;
+        }
+
+        .journal-delete {
+            width: 100%;
+            min-height: 40px;
+            margin-top: 12px;
+            background: #3a2028;
+            color: #ffb4bd;
+            border: 1px solid #5a2b36;
+            font-size: 12px;
+        }
+
+        .journal-refresh {
+            margin-top: 10px;
+            background: #202b45;
+            color: #cbd5ea;
+            font-size: 12px;
         }
 
         .hidden {
@@ -414,6 +433,97 @@
             line-height: 1.5;
         }
 
+        .journal-status {
+            margin-top: 11px;
+            padding: 9px 10px;
+            border-radius: 9px;
+            font-size: 11px;
+            line-height: 1.5;
+        }
+
+        .journal-open {
+            background: #1b1b2a;
+            color: #b9c2d7;
+            border: 1px solid #303653;
+        }
+
+        .journal-finished {
+            background: #10271c;
+            color: #a7f3c1;
+            border: 1px solid #245b3b;
+        }
+
+        .journal-deleted {
+            background: #2b151b;
+            color: #ff9ba6;
+            border: 1px solid #5c2730;
+        }
+
+        .journal-result {
+            margin-top: 8px;
+            padding-top: 8px;
+            border-top: 1px solid #26324e;
+        }
+
+        .journal-analysis {
+            display: grid;
+            gap: 4px;
+            margin-top: 7px;
+        }
+
+        .analysis-row {
+            display: flex;
+            justify-content: space-between;
+            gap: 10px;
+        }
+
+        .analysis-hit {
+            color: #8ff0ad;
+            font-weight: 900;
+        }
+
+        .analysis-miss {
+            color: #ff9ca8;
+            font-weight: 900;
+        }
+
+        .analysis-neutral {
+            color: #aebbd6;
+            font-weight: 800;
+        }
+
+        .journal-summary {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 7px;
+            margin-bottom: 12px;
+        }
+
+        .journal-summary-box {
+            background: #0d1425;
+            border-radius: 10px;
+            padding: 10px 6px;
+            text-align: center;
+        }
+
+        .journal-summary-label {
+            color: #7180a1;
+            font-size: 9px;
+        }
+
+        .journal-summary-value {
+            margin-top: 4px;
+            font-size: 16px;
+            font-weight: 900;
+        }
+
+        .journal-note {
+            color: #7180a1;
+            font-size: 10px;
+            line-height: 1.5;
+            margin-top: 10px;
+        }
+
         .footer {
             text-align: center;
             color: #67748f;
@@ -438,6 +548,10 @@
 
             .prob-value {
                 font-size: 21px;
+            }
+
+            .journal-summary {
+                grid-template-columns: 1fr 1fr 1fr;
             }
 
         }
@@ -604,10 +718,19 @@
         </div>
 
         <div id="journalInfo">
+
             <div class="loading">
                 Загрузка журнала...
             </div>
+
         </div>
+
+        <button
+            id="refreshJournalButton"
+            class="journal-refresh"
+        >
+            ↻ Проверить новые факты
+        </button>
 
     </section>
 
@@ -962,6 +1085,17 @@ let brain = null;
 const FEG_JOURNAL_KEY =
     "FEG_PREDICTION_JOURNAL_V0_1";
 
+const FEG_JOURNAL_VERSION =
+    "FEG-PREDICTIONS-0.2";
+
+const FEG_FACT_REFRESH_MS =
+    5 * 60 * 1000;
+
+
+/* ============================================================
+   JOURNAL STORAGE
+   ============================================================
+ */
 
 function loadPredictionJournal() {
 
@@ -1030,157 +1164,1159 @@ function savePredictionJournal(
 }
 
 
-function predictionFingerprint(
-    prediction
-) {
+/* ============================================================
+   HELPERS FOR NUMBERS / DATES
+   ============================================================
+ */
 
-    const home =
-        prediction?.home || "";
+function finiteNumber(value) {
 
-    const away =
-        prediction?.away || "";
+    if (
+        typeof value === "number" &&
+        Number.isFinite(value)
+    ) {
 
-    const competition =
-        prediction?.competition || "";
+        return value;
 
-    /*
-     * Важный момент:
-     * fingerprint не использует результат матча.
-     *
-     * Это именно состояние Brain
-     * в момент формирования прогноза.
-     */
-
-    const asOf =
-        prediction?.asOf ||
-        prediction?.predictionTime ||
-        "";
+    }
 
 
-    return [
-        competition,
-        home,
-        away,
-        asOf
-    ].join("|");
+    if (
+        typeof value === "string" &&
+        value.trim() !== ""
+    ) {
+
+        const parsed =
+            Number(value);
+
+
+        if (Number.isFinite(parsed)) {
+            return parsed;
+        }
+
+    }
+
+
+    return null;
 
 }
 
 
-function recordPrediction(
-    prediction
-) {
+function getMatchDate(match) {
 
-    if (
-        !prediction ||
-        typeof prediction !== "object"
+    const candidates = [
+
+        match?.date,
+
+        match?.utcDate,
+
+        match?.matchDate,
+
+        match?.kickoff,
+
+        match?.startDate,
+
+        match?.timestamp
+
+    ];
+
+
+    for (
+        const candidate of candidates
     ) {
 
-        return {
-            saved: false,
-            duplicate: false,
-            count:
-                loadPredictionJournal().length
-        };
+        if (
+            candidate === null ||
+            candidate === undefined ||
+            candidate === ""
+        ) {
+
+            continue;
+
+        }
+
+
+        const date =
+            new Date(candidate);
+
+
+        if (
+            !Number.isNaN(
+                date.getTime()
+            )
+        ) {
+
+            return date;
+
+        }
 
     }
 
 
-    const journal =
-        loadPredictionJournal();
+    return null;
+
+}
 
 
-    const fingerprint =
-        predictionFingerprint(
-            prediction
+function getMatchHomeGoals(
+    match
+) {
+
+    const candidates = [
+
+        match?.home_goals,
+
+        match?.homeGoals,
+
+        match?.goals_home,
+
+        match?.score?.home,
+
+        match?.score?.fullTime?.home,
+
+        match?.result?.home_goals
+
+    ];
+
+
+    for (
+        const candidate of candidates
+    ) {
+
+        const value =
+            finiteNumber(
+                candidate
+            );
+
+
+        if (value !== null) {
+            return value;
+        }
+
+    }
+
+
+    return null;
+
+}
+
+
+function getMatchAwayGoals(
+    match
+) {
+
+    const candidates = [
+
+        match?.away_goals,
+
+        match?.awayGoals,
+
+        match?.goals_away,
+
+        match?.score?.away,
+
+        match?.score?.fullTime?.away,
+
+        match?.result?.away_goals
+
+    ];
+
+
+    for (
+        const candidate of candidates
+    ) {
+
+        const value =
+            finiteNumber(
+                candidate
+            );
+
+
+        if (value !== null) {
+            return value;
+        }
+
+    }
+
+
+    return null;
+
+}
+
+
+function normalizeText(
+    value
+) {
+
+    return String(
+        value ?? ""
+    )
+        .trim()
+        .toLowerCase();
+
+}
+
+
+function getMatchStatus(
+    match
+) {
+
+    const status =
+        String(
+            match?.status ??
+            ""
+        )
+        .trim()
+        .toUpperCase();
+
+
+    return status;
+
+}
+
+
+/* ============================================================
+   FIND FUTURE FACT
+   ============================================================
+ */
+
+function findFactForPrediction(
+    entry
+) {
+
+    const prediction =
+        entry?.prediction || {};
+
+
+    const home =
+        normalizeText(
+            prediction.home
         );
+
+
+    const away =
+        normalizeText(
+            prediction.away
+        );
+
+
+    const competition =
+        normalizeText(
+            prediction.competition
+        );
+
+
+    if (!home || !away) {
+        return null;
+    }
+
+
+    const createdAt =
+        new Date(
+            entry.createdAt ||
+            prediction.asOf ||
+            prediction.predictionTime ||
+            0
+        );
+
+
+    if (
+        Number.isNaN(
+            createdAt.getTime()
+        )
+    ) {
+
+        return null;
+
+    }
+
+
+    const candidates = [];
+
+
+    for (
+        const match of results
+    ) {
+
+        if (!match || typeof match !== "object") {
+            continue;
+        }
+
+
+        const matchHome =
+            normalizeText(
+                match.home
+            );
+
+
+        const matchAway =
+            normalizeText(
+                match.away
+            );
+
+
+        if (
+            matchHome !== home ||
+            matchAway !== away
+        ) {
+
+            continue;
+
+        }
+
+
+        if (
+            competition &&
+            match.competition !== undefined &&
+            match.competition !== null &&
+            normalizeText(
+                match.competition
+            ) !== competition
+        ) {
+
+            continue;
+
+        }
+
+
+        const matchDate =
+            getMatchDate(
+                match
+            );
+
+
+        if (!matchDate) {
+            continue;
+        }
+
+
+        /*
+         * Очень важное правило:
+         *
+         * матч должен быть после момента
+         * создания прогноза.
+         *
+         * Поэтому старый матч не сможет
+         * случайно закрыть новый прогноз.
+         */
+
+        if (
+            matchDate.getTime() <=
+            createdAt.getTime()
+        ) {
+
+            continue;
+
+        }
+
+
+        const homeGoals =
+            getMatchHomeGoals(
+                match
+            );
+
+
+        const awayGoals =
+            getMatchAwayGoals(
+                match
+            );
+
+
+        /*
+         * Без фактического счёта
+         * матч ещё не является фактом
+         * для Evaluator.
+         */
+
+        if (
+            homeGoals === null ||
+            awayGoals === null
+        ) {
+
+            continue;
+
+        }
+
+
+        /*
+         * Если статус явно указан
+         * и матч не завершён — не закрываем.
+         */
+
+        const status =
+            getMatchStatus(
+                match
+            );
+
+
+        const unfinishedStatuses = [
+
+            "SCHEDULED",
+            "TIMED",
+            "POSTPONED",
+            "CANCELLED",
+            "CANCELED",
+            "SUSPENDED"
+
+        ];
+
+
+        if (
+            unfinishedStatuses.includes(
+                status
+            )
+        ) {
+
+            continue;
+
+        }
+
+
+        candidates.push({
+
+            match,
+
+            matchDate,
+
+            homeGoals,
+
+            awayGoals
+
+        });
+
+    }
+
+
+    if (!candidates.length) {
+        return null;
+    }
 
 
     /*
-     * Не записываем одинаковую мысль
-     * повторно.
+     * Если есть несколько будущих матчей
+     * с теми же командами, берём ближайший
+     * после времени прогноза.
      */
 
-    const duplicate =
-        journal.some(
-            item =>
-                item.fingerprint ===
-                fingerprint
-        );
+    candidates.sort(
+        (a, b) =>
+            a.matchDate.getTime() -
+            b.matchDate.getTime()
+    );
 
 
-    if (duplicate) {
+    return candidates[0];
 
-        return {
-            saved: false,
-            duplicate: true,
-            count: journal.length
-        };
+}
+
+
+/* ============================================================
+   RESULT HELPERS
+   ============================================================
+ */
+
+function actual1X2(
+    homeGoals,
+    awayGoals
+) {
+
+    if (
+        homeGoals >
+        awayGoals
+    ) {
+
+        return "1";
 
     }
 
 
-    const entry = {
+    if (
+        homeGoals <
+        awayGoals
+    ) {
 
-        journalVersion:
-            "FEG-PREDICTIONS-0.1",
+        return "2";
 
-        predictionId:
-            "FEG-" +
-            Date.now() +
-            "-" +
-            Math.random()
-                .toString(36)
-                .slice(2, 8),
+    }
 
-        createdAt:
-            new Date().toISOString(),
 
-        fingerprint:
+    return "X";
 
-            fingerprint,
+}
 
-        status:
-            "PREDICTED",
 
-        /*
-         * Полная независимая копия.
-         *
-         * Если Brain потом изменится,
-         * старая запись не изменится.
-         */
+function predicted1X2(
+    prediction
+) {
 
-        prediction:
-            JSON.parse(
-                JSON.stringify(
-                    prediction
-                )
+    const probabilities =
+        prediction?.probabilities1X2 ||
+        {};
+
+
+    const values = {
+
+        "1":
+            finiteNumber(
+                probabilities["1"]
+            ),
+
+        "X":
+            finiteNumber(
+                probabilities["X"]
+            ),
+
+        "2":
+            finiteNumber(
+                probabilities["2"]
             )
 
     };
 
 
-    journal.push(entry);
+    const available =
+        Object.entries(
+            values
+        )
+        .filter(
+            ([, value]) =>
+                value !== null
+        );
 
 
-    const saved =
-        savePredictionJournal(
-            journal
+    if (!available.length) {
+        return null;
+    }
+
+
+    available.sort(
+        (a, b) =>
+            b[1] - a[1]
+    );
+
+
+    return available[0][0];
+
+}
+
+
+function predictedBTTS(
+    prediction
+) {
+
+    const btts =
+        prediction?.btts ||
+        {};
+
+
+    const yes =
+        finiteNumber(
+            btts.yes
+        );
+
+
+    const no =
+        finiteNumber(
+            btts.no
+        );
+
+
+    if (
+        yes === null &&
+        no === null
+    ) {
+
+        return null;
+
+    }
+
+
+    if (
+        no === null
+    ) {
+
+        return "YES";
+
+    }
+
+
+    if (
+        yes === null
+    ) {
+
+        return "NO";
+
+    }
+
+
+    return yes >= no
+        ? "YES"
+        : "NO";
+
+}
+
+
+function predictedOver25(
+    prediction
+) {
+
+    const totals =
+        prediction?.totals ||
+        {};
+
+
+    const over =
+        finiteNumber(
+            totals.over25
+        );
+
+
+    const under =
+        finiteNumber(
+            totals.under25
+        );
+
+
+    if (
+        over === null &&
+        under === null
+    ) {
+
+        return null;
+
+    }
+
+
+    if (
+        under === null
+    ) {
+
+        return "OVER";
+
+    }
+
+
+    if (
+        over === null
+    ) {
+
+        return "UNDER";
+
+    }
+
+
+    return over >= under
+        ? "OVER"
+        : "UNDER";
+
+}
+
+
+function actualBTTS(
+    homeGoals,
+    awayGoals
+) {
+
+    return (
+        homeGoals > 0 &&
+        awayGoals > 0
+    )
+        ? "YES"
+        : "NO";
+
+}
+
+
+function actualOver25(
+    homeGoals,
+    awayGoals
+) {
+
+    return (
+        homeGoals +
+        awayGoals
+    ) > 2.5
+        ? "OVER"
+        : "UNDER";
+
+}
+
+
+function topScoreHit(
+    prediction,
+    homeGoals,
+    awayGoals
+) {
+
+    const scores =
+        Array.isArray(
+            prediction?.topScores
+        )
+            ? prediction.topScores
+            : [];
+
+
+    if (!scores.length) {
+        return null;
+    }
+
+
+    const actual =
+        `${homeGoals}:${awayGoals}`;
+
+
+    const top =
+        String(
+            scores[0]?.score ??
+            ""
+        );
+
+
+    if (!top) {
+        return null;
+    }
+
+
+    return (
+        top === actual
+    );
+
+}
+
+
+/* ============================================================
+   EVALUATE ONE PREDICTION
+   ============================================================
+ */
+
+function evaluatePrediction(
+    entry,
+    fact
+) {
+
+    const prediction =
+        entry.prediction || {};
+
+
+    const homeGoals =
+        fact.homeGoals;
+
+
+    const awayGoals =
+        fact.awayGoals;
+
+
+    const actual =
+        actual1X2(
+            homeGoals,
+            awayGoals
+        );
+
+
+    const predicted =
+        predicted1X2(
+            prediction
+        );
+
+
+    const actualBtts =
+        actualBTTS(
+            homeGoals,
+            awayGoals
+        );
+
+
+    const predictedBtts =
+        predictedBTTS(
+            prediction
+        );
+
+
+    const actualTotal =
+        homeGoals +
+        awayGoals;
+
+
+    const actualTotal25 =
+        actualOver25(
+            homeGoals,
+            awayGoals
+        );
+
+
+    const predictedTotal25 =
+        predictedOver25(
+            prediction
+        );
+
+
+    const exactHit =
+        topScoreHit(
+            prediction,
+            homeGoals,
+            awayGoals
+        );
+
+
+    const lambdaHome =
+        finiteNumber(
+            prediction.lambdaHome
+        );
+
+
+    const lambdaAway =
+        finiteNumber(
+            prediction.lambdaAway
         );
 
 
     return {
 
-        saved,
+        evaluatorVersion:
+            "Prediction-Evaluator-0.1",
 
-        duplicate: false,
+        evaluatedAt:
+            new Date().toISOString(),
 
-        count:
-            journal.length,
+        factDate:
+            fact.matchDate.toISOString(),
 
-        entry
+        fact: {
+
+            homeGoals,
+
+            awayGoals,
+
+            score:
+                `${homeGoals}:${awayGoals}`,
+
+            totalGoals:
+                actualTotal
+
+        },
+
+        analysis: {
+
+            predicted1X2:
+                predicted,
+
+            actual1X2:
+                actual,
+
+            result1X2Hit:
+                predicted !== null
+                    ? predicted === actual
+                    : null,
+
+            predictedBTTS:
+                predictedBtts,
+
+            actualBTTS:
+                actualBtts,
+
+            bttsHit:
+                predictedBtts !== null
+                    ? predictedBtts === actualBtts
+                    : null,
+
+            predictedOver25:
+                predictedTotal25,
+
+            actualOver25:
+                actualTotal25,
+
+            over25Hit:
+                predictedTotal25 !== null
+                    ? predictedTotal25 === actualTotal25
+                    : null,
+
+            topScoreHit:
+                exactHit
+
+        },
+
+        lambda: {
+
+            home:
+                lambdaHome,
+
+            away:
+                lambdaAway,
+
+            homeError:
+                lambdaHome !== null
+                    ? homeGoals -
+                      lambdaHome
+                    : null,
+
+            awayError:
+                lambdaAway !== null
+                    ? awayGoals -
+                      lambdaAway
+                    : null
+
+        }
 
     };
+
+}
+
+
+/* ============================================================
+   EVALUATE ENTIRE JOURNAL
+   ============================================================
+ */
+
+function evaluateJournalAgainstResults() {
+
+    const journal =
+        loadPredictionJournal();
+
+
+    if (!journal.length) {
+
+        renderJournal();
+
+        return {
+
+            checked: 0,
+
+            finished: 0
+
+        };
+
+    }
+
+
+    let changed = false;
+
+    let finishedNow = 0;
+
+
+    const updated =
+        journal.map(
+            entry => {
+
+                /*
+                 * Если запись уже закрыта,
+                 * не пересчитываем её.
+                 *
+                 * Исторический анализ
+                 * остаётся неизменным.
+                 */
+
+                if (
+                    entry.status ===
+                    "FINISHED" &&
+                    entry.evaluation
+                ) {
+
+                    return entry;
+
+                }
+
+
+                /*
+                 * Удалённые записи сюда
+                 * в нормальном режиме не попадут,
+                 * но дополнительно защищаемся.
+                 */
+
+                if (
+                    entry.status ===
+                    "DELETED"
+                ) {
+
+                    return entry;
+
+                }
+
+
+                const fact =
+                    findFactForPrediction(
+                        entry
+                    );
+
+
+                if (!fact) {
+
+                    if (
+                        entry.status !==
+                        "OPEN"
+                    ) {
+
+                        changed = true;
+
+                        return {
+
+                            ...entry,
+
+                            status:
+                                "OPEN"
+
+                        };
+
+                    }
+
+
+                    return entry;
+
+                }
+
+
+                const evaluation =
+                    evaluatePrediction(
+                        entry,
+                        fact
+                    );
+
+
+                changed = true;
+
+                finishedNow++;
+
+
+                return {
+
+                    ...entry,
+
+                    status:
+                        "FINISHED",
+
+                    evaluation
+
+                };
+
+            }
+        );
+
+
+    if (changed) {
+
+        savePredictionJournal(
+            updated
+        );
+
+    }
+
+
+    renderJournal();
+
+
+    return {
+
+        checked:
+            updated.length,
+
+        finished:
+            finishedNow
+
+    };
+
+}
+
+
+/* ============================================================
+   DELETE ONE PREDICTION
+   ============================================================
+ */
+
+function deletePrediction(
+    predictionId
+) {
+
+    const journal =
+        loadPredictionJournal();
+
+
+    const entry =
+        journal.find(
+            item =>
+                item.predictionId ===
+                predictionId
+        );
+
+
+    if (!entry) {
+
+        showMessage(
+            "Прогноз уже отсутствует в журнале.",
+            "error"
+        );
+
+        return;
+
+    }
+
+
+    const prediction =
+        entry.prediction || {};
+
+
+    const home =
+        prediction.home ||
+        "—";
+
+
+    const away =
+        prediction.away ||
+        "—";
+
+
+    const confirmed =
+        window.confirm(
+
+            "Удалить этот прогноз?\n\n" +
+
+            home +
+            " vs " +
+            away +
+            "\n\n" +
+
+            "Он больше не будет участвовать " +
+            "в статистике, анализе и будущем обучении FEG."
+
+        );
+
+
+    if (!confirmed) {
+        return;
+    }
+
+
+    const filtered =
+        journal.filter(
+            item =>
+                item.predictionId !==
+                predictionId
+        );
+
+
+    const saved =
+        savePredictionJournal(
+            filtered
+        );
+
+
+    if (!saved) {
+
+        showMessage(
+            "Не удалось удалить прогноз.",
+            "error"
+        );
+
+        return;
+
+    }
+
+
+    renderJournal();
+
+
+    showMessage(
+        "🗑️ Прогноз удалён из журнала.",
+        "success"
+    );
 
 }
 
@@ -1189,6 +2325,62 @@ function recordPrediction(
    JOURNAL UI
    ============================================================
  */
+
+function renderAnalysisRow(
+    label,
+    value
+) {
+
+    let className =
+        "analysis-neutral";
+
+
+    if (value === true) {
+
+        className =
+            "analysis-hit";
+
+        value =
+            "✓ УГАДАНО";
+
+    } else if (
+        value === false
+    ) {
+
+        className =
+            "analysis-miss";
+
+        value =
+            "✗ ОШИБКА";
+
+    } else {
+
+        value =
+            "—";
+
+    }
+
+
+    return `
+
+        <div class="analysis-row">
+
+            <span>
+                ${escapeHTML(label)}
+            </span>
+
+            <strong
+                class="${className}"
+            >
+                ${escapeHTML(value)}
+            </strong>
+
+        </div>
+
+    `;
+
+}
+
 
 function renderJournal() {
 
@@ -1208,10 +2400,10 @@ function renderJournal() {
 
             <div class="journal-empty">
 
-                FEG пока ничего не запомнил.<br>
+                FEG пока ничего не запомнил.<br><br>
 
-                Сделай первый прогноз — Brain
-                сохранит свою мысль здесь.
+                Сделай прогноз — Brain сохранит
+                свою мысль здесь.
 
             </div>
 
@@ -1222,10 +2414,25 @@ function renderJournal() {
     }
 
 
-    /*
-     * Показываем последние 10 мыслей.
-     * Сам журнал хранит все записи.
-     */
+    const total =
+        journal.length;
+
+
+    const finished =
+        journal.filter(
+            item =>
+                item.status ===
+                "FINISHED"
+        ).length;
+
+
+    const open =
+        journal.filter(
+            item =>
+                item.status !==
+                "FINISHED"
+        ).length;
+
 
     const recent =
         journal
@@ -1236,15 +2443,45 @@ function renderJournal() {
 
     let html = `
 
-        <div class="memory-line">
+        <div class="journal-summary">
 
-            <span>
-                Всего прогнозов
-            </span>
+            <div class="journal-summary-box">
 
-            <strong>
-                ${journal.length}
-            </strong>
+                <div class="journal-summary-label">
+                    ВСЕГО
+                </div>
+
+                <div class="journal-summary-value">
+                    ${total}
+                </div>
+
+            </div>
+
+
+            <div class="journal-summary-box">
+
+                <div class="journal-summary-label">
+                    ОЖИДАЮТ
+                </div>
+
+                <div class="journal-summary-value">
+                    ${open}
+                </div>
+
+            </div>
+
+
+            <div class="journal-summary-box">
+
+                <div class="journal-summary-label">
+                    ФАКТ
+                </div>
+
+                <div class="journal-summary-value">
+                    ${finished}
+                </div>
+
+            </div>
 
         </div>
 
@@ -1252,162 +2489,394 @@ function renderJournal() {
 
 
     html += recent
-        .map(entry => {
+        .map(
+            entry => {
 
-            const prediction =
-                entry.prediction || {};
-
-
-            const probabilities =
-                prediction
-                    .probabilities1X2 ||
-                {};
+                const prediction =
+                    entry.prediction ||
+                    {};
 
 
-            const created =
-                entry.createdAt
-                    ? new Date(
-                        entry.createdAt
-                    ).toLocaleString(
-                        "ru-RU"
-                    )
-                    : "—";
+                const probabilities =
+                    prediction
+                        .probabilities1X2 ||
+                    {};
 
 
-            return `
+                const created =
+                    entry.createdAt
+                        ? new Date(
+                            entry.createdAt
+                        ).toLocaleString(
+                            "ru-RU"
+                        )
+                        : "—";
 
-                <div class="journal-item">
 
-                    <div class="journal-match">
+                const status =
+                    entry.status ||
+                    "OPEN";
 
-                        ${escapeHTML(
-                            prediction.home ||
-                            "—"
-                        )}
 
-                        <span
-                            style="color:#7180a1;"
+                let statusHTML = "";
+
+
+                if (
+                    status ===
+                    "FINISHED" &&
+                    entry.evaluation
+                ) {
+
+                    const evaluation =
+                        entry.evaluation;
+
+
+                    const fact =
+                        evaluation.fact;
+
+
+                    const analysis =
+                        evaluation.analysis;
+
+
+                    const lambda =
+                        evaluation.lambda;
+
+
+                    statusHTML = `
+
+                        <div class="journal-status journal-finished">
+
+                            <strong>
+                                ✓ ПРОАНАЛИЗИРОВАН
+                            </strong>
+
+
+                            <div class="journal-result">
+
+                                Факт:
+
+                                <strong>
+                                    ${fact.homeGoals}:${fact.awayGoals}
+                                </strong>
+
+                                <br>
+
+                                Всего голов:
+
+                                <strong>
+                                    ${fact.totalGoals}
+                                </strong>
+
+                            </div>
+
+
+                            <div class="journal-analysis">
+
+                                ${renderAnalysisRow(
+                                    "1X2",
+                                    analysis.result1X2Hit
+                                )}
+
+                                ${renderAnalysisRow(
+                                    "BTTS",
+                                    analysis.bttsHit
+                                )}
+
+                                ${renderAnalysisRow(
+                                    "O2.5",
+                                    analysis.over25Hit
+                                )}
+
+                                ${renderAnalysisRow(
+                                    "Top Score",
+                                    analysis.topScoreHit
+                                )}
+
+                            </div>
+
+
+                            <div class="journal-result">
+
+                                λ:
+
+                                <strong>
+                                    ${lambda.home ?? "—"}
+                                    —
+                                    ${lambda.away ?? "—"}
+                                </strong>
+
+                                <br>
+
+                                Факт:
+
+                                <strong>
+                                    ${fact.homeGoals}
+                                    —
+                                    ${fact.awayGoals}
+                                </strong>
+
+                                <br>
+
+                                Ошибка λ:
+
+                                <strong>
+                                    ${
+                                        lambda.homeError !== null
+                                            ? lambda.homeError.toFixed(2)
+                                            : "—"
+                                    }
+                                    —
+                                    ${
+                                        lambda.awayError !== null
+                                            ? lambda.awayError.toFixed(2)
+                                            : "—"
+                                    }
+                                </strong>
+
+                            </div>
+
+                        </div>
+
+                    `;
+
+                } else {
+
+                    statusHTML = `
+
+                        <div class="journal-status journal-open">
+
+                            ⏳ ОЖИДАЕТ ФАКТ
+
+                            <div
+                                style="margin-top:5px;"
+                            >
+                                Когда завершённый матч
+                                появится в results.json,
+                                FEG автоматически проведёт
+                                сравнение.
+
+                            </div>
+
+                        </div>
+
+                    `;
+
+                }
+
+
+                return `
+
+                    <div class="journal-item">
+
+                        <div class="journal-match">
+
+                            ${escapeHTML(
+                                prediction.home ||
+                                "—"
+                            )}
+
+                            <span
+                                style="color:#7180a1;"
+                            >
+                                vs
+                            </span>
+
+                            ${escapeHTML(
+                                prediction.away ||
+                                "—"
+                            )}
+
+                        </div>
+
+
+                        <div class="journal-meta">
+
+                            <div>
+                                Время:
+
+                                <strong>
+                                    ${escapeHTML(
+                                        created
+                                    )}
+                                </strong>
+                            </div>
+
+
+                            <div>
+                                Brain:
+
+                                <strong>
+                                    ${escapeHTML(
+                                        prediction.brainVersion ||
+                                        "—"
+                                    )}
+                                </strong>
+                            </div>
+
+
+                            <div>
+                                eXG:
+
+                                <strong>
+                                    ${escapeHTML(
+                                        prediction.exgVersion ||
+                                        (
+                                            typeof FEG_EXG_VERSION !==
+                                            "undefined"
+                                                ? FEG_EXG_VERSION
+                                                : "—"
+                                        )
+                                    )}
+                                </strong>
+                            </div>
+
+
+                            <div>
+                                λ:
+
+                                <strong>
+                                    ${prediction.lambdaHome ?? "—"}
+                                    —
+                                    ${prediction.lambdaAway ?? "—"}
+                                </strong>
+                            </div>
+
+                        </div>
+
+
+                        <div class="journal-probs">
+
+                            <div class="journal-prob">
+
+                                <div class="journal-prob-label">
+                                    HOME
+                                </div>
+
+                                <div class="journal-prob-value">
+
+                                    ${percent(
+                                        finiteNumber(
+                                            probabilities["1"]
+                                        )
+                                    )}
+
+                                </div>
+
+                            </div>
+
+
+                            <div class="journal-prob">
+
+                                <div class="journal-prob-label">
+                                    DRAW
+                                </div>
+
+                                <div class="journal-prob-value">
+
+                                    ${percent(
+                                        finiteNumber(
+                                            probabilities["X"]
+                                        )
+                                    )}
+
+                                </div>
+
+                            </div>
+
+
+                            <div class="journal-prob">
+
+                                <div class="journal-prob-label">
+                                    AWAY
+                                </div>
+
+                                <div class="journal-prob-value">
+
+                                    ${percent(
+                                        finiteNumber(
+                                            probabilities["2"]
+                                        )
+                                    )}
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+
+                        ${statusHTML}
+
+
+                        <button
+                            class="journal-delete"
+                            data-delete-prediction="${escapeHTML(
+                                entry.predictionId
+                            )}"
                         >
-                            vs
-                        </span>
-
-                        ${escapeHTML(
-                            prediction.away ||
-                            "—"
-                        )}
+                            🗑️ Удалить этот прогноз
+                        </button>
 
                     </div>
 
+                `;
 
-                    <div class="journal-meta">
-
-                        <div>
-                            Время:
-                            <strong>
-                                ${escapeHTML(
-                                    created
-                                )}
-                            </strong>
-                        </div>
-
-                        <div>
-                            Brain:
-                            <strong>
-                                ${escapeHTML(
-                                    prediction.brainVersion ||
-                                    "—"
-                                )}
-                            </strong>
-                        </div>
-
-                        <div>
-                            eXG:
-                            <strong>
-                                ${escapeHTML(
-                                    prediction.exgVersion ||
-                                    FEG_EXG_VERSION ||
-                                    "—"
-                                )}
-                            </strong>
-                        </div>
-
-                        <div>
-                            λ:
-                            <strong>
-                                ${prediction.lambdaHome ?? "—"}
-                                —
-                                ${prediction.lambdaAway ?? "—"}
-                            </strong>
-                        </div>
-
-                    </div>
-
-
-                    <div class="journal-probs">
-
-                        <div class="journal-prob">
-
-                            <div class="journal-prob-label">
-                                HOME
-                            </div>
-
-                            <div class="journal-prob-value">
-                                ${percent(
-                                    probabilities["1"]
-                                )}
-                            </div>
-
-                        </div>
-
-
-                        <div class="journal-prob">
-
-                            <div class="journal-prob-label">
-                                DRAW
-                            </div>
-
-                            <div class="journal-prob-value">
-                                ${percent(
-                                    probabilities["X"]
-                                )}
-                            </div>
-
-                        </div>
-
-
-                        <div class="journal-prob">
-
-                            <div class="journal-prob-label">
-                                AWAY
-                            </div>
-
-                            <div class="journal-prob-value">
-                                ${percent(
-                                    probabilities["2"]
-                                )}
-                            </div>
-
-                        </div>
-
-                    </div>
-
-                </div>
-
-            `;
-
-        })
+            }
+        )
         .join("");
 
 
-    /*
-     * Пока НЕ даём кнопку очистки.
-     *
-     * Журнал должен быть максимально
-     * защищён от случайного удаления.
-     */
+    html += `
+
+        <div class="journal-note">
+
+            Журнал хранится локально в этом браузере.
+            Удалённые прогнозы не участвуют в анализе.
+            Факты берутся только из results.json.
+
+            <br><br>
+
+            Prediction Evaluator:
+            <strong>
+                v0.1
+            </strong>
+
+        </div>
+
+    `;
+
 
     container.innerHTML =
         html;
+
+
+    /*
+     * Кнопки удаления подключаем
+     * после построения HTML.
+     */
+
+    container
+        .querySelectorAll(
+            "[data-delete-prediction]"
+        )
+        .forEach(
+            button => {
+
+                button.addEventListener(
+                    "click",
+                    () => {
+
+                        deletePrediction(
+                            button.dataset
+                                .deletePrediction
+                        );
+
+                    }
+                );
+
+            }
+        );
 
 }
 
@@ -1444,6 +2913,12 @@ const predictButton =
 const swapButton =
     document.getElementById(
         "swapButton"
+    );
+
+
+const refreshJournalButton =
+    document.getElementById(
+        "refreshJournalButton"
     );
 
 
@@ -1584,6 +3059,128 @@ async function loadJSON(
 
 
 /* ============================================================
+   REFRESH RESULTS + EVALUATOR
+   ============================================================
+ */
+
+async function refreshFactsAndEvaluate(
+    showUserMessage = false
+) {
+
+    try {
+
+        const loadedResults =
+            await loadJSON(
+                "results.json"
+            );
+
+
+        if (
+            !Array.isArray(
+                loadedResults
+            )
+        ) {
+
+            throw new Error(
+                "results.json должен содержать массив матчей."
+            );
+
+        }
+
+
+        results =
+            loadedResults;
+
+
+        /*
+         * Сначала обновляем команды/память.
+         */
+
+        renderMemory();
+
+        updateTeams();
+
+
+        /*
+         * Затем запускаем Evaluator.
+         */
+
+        const evaluation =
+            evaluateJournalAgainstResults();
+
+
+        if (
+            showUserMessage
+        ) {
+
+            if (
+                evaluation.finished > 0
+            ) {
+
+                showMessage(
+
+                    "✓ FEG нашёл " +
+                    evaluation.finished +
+                    " новый завершённый матч " +
+                    "и автоматически провёл анализ.",
+
+                    "success"
+
+                );
+
+            } else {
+
+                showMessage(
+
+                    "✓ Новых фактов для закрытия " +
+                    "прогнозов пока нет.",
+
+                    "success"
+
+                );
+
+            }
+
+        }
+
+
+        return evaluation;
+
+    } catch (error) {
+
+        console.error(
+            "Fact refresh error:",
+            error
+        );
+
+
+        if (
+            showUserMessage
+        ) {
+
+            showMessage(
+
+                "Не удалось проверить новые факты: " +
+                (
+                    error.message ||
+                    "неизвестная ошибка"
+                ),
+
+                "error"
+
+            );
+
+        }
+
+
+        return null;
+
+    }
+
+}
+
+
+/* ============================================================
    LOAD SYSTEM
    ============================================================
  */
@@ -1654,7 +3251,15 @@ async function loadSystem() {
 
         renderMemory();
 
-        renderJournal();
+
+        /*
+         * При каждом открытии страницы
+         * сразу проверяем, не появился ли
+         * новый факт.
+         */
+
+        evaluateJournalAgainstResults();
+
 
         updateTeams();
 
@@ -1762,8 +3367,10 @@ function renderMemory() {
 
             <strong>
                 ${escapeHTML(
-                    FEG_BRAIN_VERSION ||
-                    "unknown"
+                    typeof FEG_BRAIN_VERSION !==
+                    "undefined"
+                        ? FEG_BRAIN_VERSION
+                        : "unknown"
                 )}
             </strong>
 
@@ -1778,8 +3385,10 @@ function renderMemory() {
 
             <strong>
                 ${escapeHTML(
-                    FEG_EXG_VERSION ||
-                    "unknown"
+                    typeof FEG_EXG_VERSION !==
+                    "undefined"
+                        ? FEG_EXG_VERSION
+                        : "unknown"
                 )}
             </strong>
 
@@ -2344,6 +3953,13 @@ function renderExG(
             .estimatedXG;
 
 
+    const exgVersion =
+        typeof FEG_EXG_VERSION !==
+        "undefined"
+            ? FEG_EXG_VERSION
+            : "—";
+
+
     container.innerHTML = `
 
         <div class="metric-grid">
@@ -2405,7 +4021,7 @@ function renderExG(
 
             Эксперимент FEG eXG v${
                 escapeHTML(
-                    FEG_EXG_VERSION
+                    exgVersion
                 )
             }.
 
@@ -2499,6 +4115,19 @@ function renderBrainInfo(
 
             <strong>
                 НЕТ
+            </strong>
+
+        </div>
+
+
+        <div class="memory-line">
+
+            <span>
+                Prediction Evaluator
+            </span>
+
+            <strong>
+                v0.1
             </strong>
 
         </div>
@@ -2608,7 +4237,7 @@ function runPrediction() {
          * ====================================================
          * VALIDATION
          * ====================================================
-         */
+ */
 
         if (
             prediction.status !==
@@ -2640,13 +4269,10 @@ function runPrediction() {
          * SAVE THOUGHT
          * ====================================================
          *
-         * ВАЖНО:
+         * Прогноз сохраняется как отдельная
+         * неизменяемая копия.
          *
-         * Здесь мы сохраняем прогноз ДО какого-либо
-         * знания о будущем результате.
-         *
-         * Поэтому эта запись является настоящим
-         * pre-match prediction.
+         * Будущий результат здесь отсутствует.
          */
 
         const journalResult =
@@ -2659,7 +4285,7 @@ function runPrediction() {
          * ====================================================
          * SHOW RESULT
          * ====================================================
-         */
+ */
 
         renderPrediction(
             prediction
@@ -2677,7 +4303,7 @@ function runPrediction() {
          * ====================================================
          * MESSAGE
          * ====================================================
-         */
+ */
 
         if (
             journalResult.saved
@@ -2767,6 +4393,177 @@ function runPrediction() {
 
 
 /* ============================================================
+   RECORD PREDICTION
+   ============================================================
+ */
+
+function predictionFingerprint(
+    prediction
+) {
+
+    const home =
+        prediction?.home || "";
+
+
+    const away =
+        prediction?.away || "";
+
+
+    const competition =
+        prediction?.competition || "";
+
+
+    /*
+     * Если brain.js не отдаёт asOf,
+     * используем момент записи.
+     *
+     * Поэтому две разные мысли,
+     * сделанные в разное время,
+     * не считаются одинаковыми.
+     */
+
+    const asOf =
+        prediction?.asOf ||
+        prediction?.predictionTime ||
+        new Date().toISOString();
+
+
+    return [
+        competition,
+        home,
+        away,
+        asOf
+    ].join("|");
+
+}
+
+
+function recordPrediction(
+    prediction
+) {
+
+    if (
+        !prediction ||
+        typeof prediction !== "object"
+    ) {
+
+        return {
+
+            saved: false,
+
+            duplicate: false,
+
+            count:
+                loadPredictionJournal().length
+
+        };
+
+    }
+
+
+    const journal =
+        loadPredictionJournal();
+
+
+    const fingerprint =
+        predictionFingerprint(
+            prediction
+        );
+
+
+    const duplicate =
+        journal.some(
+            item =>
+                item.fingerprint ===
+                fingerprint
+        );
+
+
+    if (duplicate) {
+
+        return {
+
+            saved: false,
+
+            duplicate: true,
+
+            count:
+                journal.length
+
+        };
+
+    }
+
+
+    const entry = {
+
+        journalVersion:
+            FEG_JOURNAL_VERSION,
+
+        predictionId:
+            "FEG-" +
+            Date.now() +
+            "-" +
+            Math.random()
+                .toString(36)
+                .slice(2, 8),
+
+        createdAt:
+            new Date().toISOString(),
+
+        fingerprint:
+
+            fingerprint,
+
+        status:
+            "OPEN",
+
+        /*
+         * ВАЖНО:
+         *
+         * JSON-копия фиксирует именно
+         * состояние Brain в момент прогноза.
+         *
+         * Будущие изменения brain.js
+         * эту запись не изменят.
+         */
+
+        prediction:
+            JSON.parse(
+                JSON.stringify(
+                    prediction
+                )
+            )
+
+    };
+
+
+    journal.push(entry);
+
+
+    const saved =
+        savePredictionJournal(
+            journal
+        );
+
+
+    return {
+
+        saved,
+
+        duplicate: false,
+
+        count:
+            journal.length,
+
+        entry
+
+    };
+
+}
+
+
+/* ============================================================
    SWAP
    ============================================================
  */
@@ -2811,6 +4608,49 @@ predictButton.addEventListener(
 swapButton.addEventListener(
     "click",
     swapTeams
+);
+
+
+refreshJournalButton.addEventListener(
+    "click",
+    () => {
+
+        refreshFactsAndEvaluate(
+            true
+        );
+
+    }
+);
+
+
+/* ============================================================
+   AUTOMATIC FACT CHECK
+   ============================================================
+ *
+ * Пока страница открыта, FEG каждые 5 минут
+ * проверяет свежий results.json.
+ *
+ * Это НЕ обучение.
+ *
+ * Это только:
+ *
+ * results.json
+ *      ↓
+ * Prediction Evaluator
+ *      ↓
+ * сравнение
+ *
+ */
+
+setInterval(
+    () => {
+
+        refreshFactsAndEvaluate(
+            false
+        );
+
+    },
+    FEG_FACT_REFRESH_MS
 );
 
 
