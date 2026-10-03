@@ -1,0 +1,5 @@
+{
+  "version": "FEG-PREDICTIONS-0.1",
+  "description": "Immutable journal of FEG pre-match predictions. A prediction is created before kickoff and is never overwritten.",
+  "predictions": []
+}
