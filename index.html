@@ -1,0 +1,1882 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>FEG — Football Evolution God</title>
+
+    <meta
+        name="description"
+        content="FEG Super Brain — футбольная аналитическая система"
+    >
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            background: #0b1020;
+            color: #f4f7fb;
+            font-family:
+                -apple-system,
+                BlinkMacSystemFont,
+                "Segoe UI",
+                Roboto,
+                Arial,
+                sans-serif;
+        }
+
+        .app {
+            width: 100%;
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 18px 14px 50px;
+        }
+
+        .header {
+            text-align: center;
+            padding: 18px 10px 24px;
+        }
+
+        .logo {
+            font-size: 34px;
+            font-weight: 900;
+            letter-spacing: 2px;
+        }
+
+        .subtitle {
+            margin-top: 7px;
+            color: #9da9c4;
+            font-size: 14px;
+        }
+
+        .brain-status {
+            display: inline-flex;
+            align-items: center;
+            gap: 7px;
+            margin-top: 14px;
+            padding: 7px 12px;
+            border-radius: 999px;
+            background: #151d34;
+            color: #aebbd6;
+            font-size: 12px;
+        }
+
+        .dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #4ade80;
+        }
+
+        .card {
+            background: #121a2d;
+            border: 1px solid #222d46;
+            border-radius: 18px;
+            padding: 16px;
+            margin-bottom: 14px;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.18);
+        }
+
+        .card-title {
+            font-size: 15px;
+            font-weight: 800;
+            margin-bottom: 14px;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+
+        .field {
+            display: flex;
+            flex-direction: column;
+            gap: 7px;
+        }
+
+        .field.full {
+            grid-column: 1 / -1;
+        }
+
+        label {
+            font-size: 12px;
+            color: #8f9bb5;
+        }
+
+        select,
+        button {
+            width: 100%;
+            min-height: 48px;
+            border-radius: 12px;
+            border: 1px solid #2a3653;
+            background: #0d1425;
+            color: #ffffff;
+            padding: 0 13px;
+            font-size: 14px;
+            outline: none;
+        }
+
+        select:focus {
+            border-color: #6378ff;
+        }
+
+        button {
+            border: none;
+            background: #5b6cff;
+            font-weight: 800;
+            cursor: pointer;
+            transition: transform .12s ease, opacity .12s ease;
+        }
+
+        button:hover {
+            opacity: .92;
+        }
+
+        button:active {
+            transform: scale(.98);
+        }
+
+        .secondary {
+            margin-top: 10px;
+            background: #202b45;
+            color: #cbd5ea;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        .error {
+            color: #ff8c8c;
+            background: #2b151b;
+            border: 1px solid #5c2730;
+            border-radius: 12px;
+            padding: 12px;
+            font-size: 13px;
+            line-height: 1.45;
+        }
+
+        .success {
+            color: #a7f3c1;
+            background: #10271c;
+            border: 1px solid #245b3b;
+            border-radius: 12px;
+            padding: 12px;
+            font-size: 13px;
+        }
+
+        .loading {
+            color: #aebbd6;
+            font-size: 13px;
+        }
+
+        .hero {
+            text-align: center;
+            padding: 20px 10px;
+        }
+
+        .teams {
+            font-size: 22px;
+            font-weight: 900;
+            line-height: 1.35;
+        }
+
+        .vs {
+            display: block;
+            color: #7180a1;
+            font-size: 12px;
+            margin: 7px 0;
+            font-weight: 700;
+        }
+
+        .probabilities {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 9px;
+            margin-top: 16px;
+        }
+
+        .prob {
+            background: #0c1324;
+            border: 1px solid #26324e;
+            border-radius: 14px;
+            padding: 13px 8px;
+            text-align: center;
+        }
+
+        .prob-name {
+            color: #8996b1;
+            font-size: 12px;
+        }
+
+        .prob-value {
+            margin-top: 5px;
+            font-size: 25px;
+            font-weight: 900;
+        }
+
+        .lambda-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+
+        .lambda {
+            background: #0d1425;
+            border-radius: 13px;
+            padding: 14px;
+            text-align: center;
+        }
+
+        .lambda-title {
+            color: #8794af;
+            font-size: 12px;
+        }
+
+        .lambda-value {
+            margin-top: 5px;
+            font-size: 24px;
+            font-weight: 900;
+        }
+
+        .metric-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 9px;
+        }
+
+        .metric {
+            background: #0d1425;
+            border-radius: 12px;
+            padding: 12px;
+        }
+
+        .metric-label {
+            color: #8290ab;
+            font-size: 11px;
+        }
+
+        .metric-value {
+            margin-top: 5px;
+            font-size: 17px;
+            font-weight: 800;
+        }
+
+        .scores {
+            display: grid;
+            gap: 8px;
+        }
+
+        .score-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: #0d1425;
+            padding: 11px 13px;
+            border-radius: 11px;
+        }
+
+        .score {
+            font-size: 16px;
+            font-weight: 900;
+        }
+
+        .score-prob {
+            color: #aebbd6;
+            font-size: 13px;
+        }
+
+        .state {
+            display: grid;
+            gap: 10px;
+        }
+
+        .state-team {
+            background: #0d1425;
+            border-radius: 13px;
+            padding: 13px;
+        }
+
+        .state-name {
+            font-weight: 900;
+            margin-bottom: 10px;
+        }
+
+        .state-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 5px 0;
+            color: #aab6ce;
+            font-size: 12px;
+        }
+
+        .state-row strong {
+            color: #ffffff;
+        }
+
+        .form {
+            letter-spacing: 3px;
+            font-weight: 900;
+        }
+
+        .memory-line {
+            display: flex;
+            justify-content: space-between;
+            padding: 7px 0;
+            color: #9ca9c2;
+            font-size: 12px;
+            border-bottom: 1px solid #202a40;
+        }
+
+        .memory-line:last-child {
+            border-bottom: none;
+        }
+
+        .memory-line strong {
+            color: #ffffff;
+        }
+
+        .footer {
+            text-align: center;
+            color: #67748f;
+            font-size: 11px;
+            line-height: 1.6;
+            padding: 20px 10px;
+        }
+
+        @media (max-width: 600px) {
+            .grid {
+                grid-template-columns: 1fr;
+            }
+
+            .field.full {
+                grid-column: auto;
+            }
+
+            .teams {
+                font-size: 19px;
+            }
+
+            .prob-value {
+                font-size: 21px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="app">
+
+    <header class="header">
+        <div class="logo">FEG</div>
+
+        <div class="subtitle">
+            Football Evolution God
+        </div>
+
+        <div class="brain-status">
+            <span class="dot"></span>
+            <span id="brainStatus">Загрузка Super Brain...</span>
+        </div>
+    </header>
+
+
+    <!-- =====================================================
+         SELECTOR
+         ===================================================== -->
+
+    <section class="card">
+
+        <div class="card-title">
+            🧠 FEG Super Brain
+        </div>
+
+        <div class="grid">
+
+            <div class="field full">
+                <label for="competition">
+                    Чемпионат
+                </label>
+
+                <select id="competition">
+                    <option value="PL">
+                        Англия — Premier League
+                    </option>
+
+                    <option value="PD">
+                        Испания — La Liga
+                    </option>
+
+                    <option value="BL1">
+                        Германия — Bundesliga
+                    </option>
+
+                    <option value="SA">
+                        Италия — Serie A
+                    </option>
+
+                    <option value="FL1">
+                        Франция — Ligue 1
+                    </option>
+
+                    <option value="CL">
+                        Champions League
+                    </option>
+                </select>
+            </div>
+
+
+            <div class="field">
+                <label for="homeTeam">
+                    Хозяева
+                </label>
+
+                <select id="homeTeam">
+                    <option value="">
+                        Загрузка...
+                    </option>
+                </select>
+            </div>
+
+
+            <div class="field">
+                <label for="awayTeam">
+                    Гости
+                </label>
+
+                <select id="awayTeam">
+                    <option value="">
+                        Загрузка...
+                    </option>
+                </select>
+            </div>
+
+
+            <div class="field full">
+
+                <button id="predictButton">
+                    🧠 ДУМАТЬ
+                </button>
+
+                <button
+                    id="swapButton"
+                    class="secondary"
+                >
+                    ⇄ Поменять команды
+                </button>
+
+            </div>
+
+        </div>
+
+    </section>
+
+
+    <!-- =====================================================
+         SYSTEM MEMORY
+         ===================================================== -->
+
+    <section class="card">
+
+        <div class="card-title">
+            💾 Живая память
+        </div>
+
+        <div id="memoryInfo">
+            <div class="loading">
+                Загрузка памяти...
+            </div>
+        </div>
+
+    </section>
+
+
+    <!-- =====================================================
+         MESSAGE
+         ===================================================== -->
+
+    <section
+        id="message"
+        class="hidden"
+    ></section>
+
+
+    <!-- =====================================================
+         RESULT
+         ===================================================== -->
+
+    <section
+        id="result"
+        class="hidden"
+    >
+
+        <div class="card hero">
+
+            <div class="teams">
+                <span id="resultHome">
+                    —
+                </span>
+
+                <span class="vs">
+                    VS
+                </span>
+
+                <span id="resultAway">
+                    —
+                </span>
+            </div>
+
+
+            <div class="probabilities">
+
+                <div class="prob">
+                    <div class="prob-name">
+                        ПОБЕДА ХОЗЯЕВ
+                    </div>
+
+                    <div
+                        id="probHome"
+                        class="prob-value"
+                    >
+                        —
+                    </div>
+                </div>
+
+
+                <div class="prob">
+                    <div class="prob-name">
+                        НИЧЬЯ
+                    </div>
+
+                    <div
+                        id="probDraw"
+                        class="prob-value"
+                    >
+                        —
+                    </div>
+                </div>
+
+
+                <div class="prob">
+                    <div class="prob-name">
+                        ПОБЕДА ГОСТЕЙ
+                    </div>
+
+                    <div
+                        id="probAway"
+                        class="prob-value"
+                    >
+                        —
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- LAMBDA -->
+
+        <div class="card">
+
+            <div class="card-title">
+                ⚽ Goal Model
+            </div>
+
+            <div class="lambda-grid">
+
+                <div class="lambda">
+
+                    <div class="lambda-title">
+                        λ HOME
+                    </div>
+
+                    <div
+                        id="lambdaHome"
+                        class="lambda-value"
+                    >
+                        —
+                    </div>
+
+                </div>
+
+
+                <div class="lambda">
+
+                    <div class="lambda-title">
+                        λ AWAY
+                    </div>
+
+                    <div
+                        id="lambdaAway"
+                        class="lambda-value"
+                    >
+                        —
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- BTTS / TOTALS -->
+
+        <div class="card">
+
+            <div class="card-title">
+                📊 Вероятности
+            </div>
+
+            <div class="metric-grid">
+
+                <div class="metric">
+                    <div class="metric-label">
+                        BTTS — ДА
+                    </div>
+
+                    <div
+                        id="bttsYes"
+                        class="metric-value"
+                    >
+                        —
+                    </div>
+                </div>
+
+
+                <div class="metric">
+                    <div class="metric-label">
+                        BTTS — НЕТ
+                    </div>
+
+                    <div
+                        id="bttsNo"
+                        class="metric-value"
+                    >
+                        —
+                    </div>
+                </div>
+
+
+                <div class="metric">
+                    <div class="metric-label">
+                        OVER 1.5
+                    </div>
+
+                    <div
+                        id="over15"
+                        class="metric-value"
+                    >
+                        —
+                    </div>
+                </div>
+
+
+                <div class="metric">
+                    <div class="metric-label">
+                        OVER 2.5
+                    </div>
+
+                    <div
+                        id="over25"
+                        class="metric-value"
+                    >
+                        —
+                    </div>
+                </div>
+
+
+                <div class="metric">
+                    <div class="metric-label">
+                        UNDER 2.5
+                    </div>
+
+                    <div
+                        id="under25"
+                        class="metric-value"
+                    >
+                        —
+                    </div>
+                </div>
+
+
+                <div class="metric">
+                    <div class="metric-label">
+                        OVER 3.5
+                    </div>
+
+                    <div
+                        id="over35"
+                        class="metric-value"
+                    >
+                        —
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- EXACT SCORES -->
+
+        <div class="card">
+
+            <div class="card-title">
+                🎯 Наиболее вероятные счета
+            </div>
+
+            <div
+                id="scores"
+                class="scores"
+            ></div>
+
+        </div>
+
+
+        <!-- TEAM MEMORY -->
+
+        <div class="card">
+
+            <div class="card-title">
+                🧬 Состояние команд
+            </div>
+
+            <div
+                id="teamState"
+                class="state"
+            ></div>
+
+        </div>
+
+
+        <!-- EXG -->
+
+        <div class="card">
+
+            <div class="card-title">
+                🧪 FEG Estimated xG
+            </div>
+
+            <div
+                id="exgInfo"
+            ></div>
+
+        </div>
+
+
+        <!-- BRAIN INFO -->
+
+        <div class="card">
+
+            <div class="card-title">
+                🧠 Состояние мозга
+            </div>
+
+            <div
+                id="brainInfo"
+            ></div>
+
+        </div>
+
+    </section>
+
+
+    <footer class="footer">
+
+        FEG — Football Evolution God<br>
+
+        Не усложнять. Не верить на слово. Проверять.<br><br>
+
+        FEG eXG — экспериментальная оценка,
+        не provider xG.
+
+    </footer>
+
+</div>
+
+
+<script src="brain.js"></script>
+
+
+<script>
+
+"use strict";
+
+
+/* ============================================================
+   GLOBAL DATA
+   ============================================================
+ */
+
+let results = [];
+let memory = null;
+let brain = null;
+
+
+/* ============================================================
+   DOM
+   ============================================================
+ */
+
+const competitionSelect =
+    document.getElementById("competition");
+
+const homeSelect =
+    document.getElementById("homeTeam");
+
+const awaySelect =
+    document.getElementById("awayTeam");
+
+const predictButton =
+    document.getElementById("predictButton");
+
+const swapButton =
+    document.getElementById("swapButton");
+
+const brainStatus =
+    document.getElementById("brainStatus");
+
+const memoryInfo =
+    document.getElementById("memoryInfo");
+
+const message =
+    document.getElementById("message");
+
+const result =
+    document.getElementById("result");
+
+
+/* ============================================================
+   HELPERS
+   ============================================================
+ */
+
+function escapeHTML(value) {
+
+    return String(value ?? "")
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+
+}
+
+
+function percent(value) {
+
+    if (
+        typeof value !== "number" ||
+        !Number.isFinite(value)
+    ) {
+        return "—";
+    }
+
+    return (
+        value * 100
+    ).toFixed(1) + "%";
+
+}
+
+
+function showMessage(
+    text,
+    type = "error"
+) {
+
+    message.className =
+        type === "success"
+            ? "success"
+            : "error";
+
+    message.textContent = text;
+
+}
+
+
+function clearMessage() {
+
+    message.className =
+        "hidden";
+
+    message.textContent = "";
+
+}
+
+
+/* ============================================================
+   LOAD JSON
+   ============================================================
+ */
+
+async function loadJSON(url) {
+
+    const response =
+        await fetch(
+            url + "?v=" + Date.now()
+        );
+
+    if (!response.ok) {
+
+        throw new Error(
+            "Не удалось загрузить " + url
+        );
+
+    }
+
+    return await response.json();
+
+}
+
+
+/* ============================================================
+   LOAD SYSTEM
+   ============================================================
+ */
+
+async function loadSystem() {
+
+    try {
+
+        brainStatus.textContent =
+            "Загрузка данных...";
+
+
+        const loadedResults =
+            await loadJSON(
+                "results.json"
+            );
+
+
+        const loadedMemory =
+            await loadJSON(
+                "memory.json"
+            );
+
+
+        if (!Array.isArray(loadedResults)) {
+
+            throw new Error(
+                "results.json должен содержать массив матчей."
+            );
+
+        }
+
+
+        results =
+            loadedResults;
+
+        memory =
+            loadedMemory;
+
+
+        if (
+            typeof FEGBRAIN !== "function"
+        ) {
+
+            throw new Error(
+                "brain.js не загрузился."
+            );
+
+        }
+
+
+        brain =
+            new FEGBRAIN(
+                results,
+                memory
+            );
+
+
+        brainStatus.textContent =
+            "Super Brain готов";
+
+
+        renderMemory();
+
+
+        updateTeams();
+
+
+    } catch (error) {
+
+        console.error(error);
+
+        brainStatus.textContent =
+            "Ошибка загрузки";
+
+        showMessage(
+            error.message ||
+            "Неизвестная ошибка.",
+            "error"
+        );
+
+    }
+
+}
+
+
+/* ============================================================
+   MEMORY UI
+   ============================================================
+ */
+
+function renderMemory() {
+
+    const matchCount =
+        Array.isArray(results)
+            ? results.length
+            : 0;
+
+
+    let teamCount = 0;
+
+
+    if (
+        memory &&
+        typeof memory === "object"
+    ) {
+
+        if (
+            Array.isArray(
+                memory.teams
+            )
+        ) {
+
+            teamCount =
+                memory.teams.length;
+
+        } else if (
+            memory.teams &&
+            typeof memory.teams === "object"
+        ) {
+
+            teamCount =
+                Object.keys(
+                    memory.teams
+                ).length;
+
+        }
+
+    }
+
+
+    memoryInfo.innerHTML = `
+
+        <div class="memory-line">
+            <span>Матчей в памяти</span>
+            <strong>${matchCount}</strong>
+        </div>
+
+        <div class="memory-line">
+            <span>Команд</span>
+            <strong>${teamCount}</strong>
+        </div>
+
+        <div class="memory-line">
+            <span>Brain</span>
+            <strong>
+                ${escapeHTML(
+                    FEG_BRAIN_VERSION ||
+                    "unknown"
+                )}
+            </strong>
+        </div>
+
+        <div class="memory-line">
+            <span>FEG eXG</span>
+            <strong>
+                ${escapeHTML(
+                    FEG_EXG_VERSION ||
+                    "unknown"
+                )}
+            </strong>
+        </div>
+
+    `;
+
+}
+
+
+/* ============================================================
+   GET TEAMS
+   ============================================================
+ */
+
+function getTeamsForCompetition(
+    competition
+) {
+
+    const teams =
+        new Set();
+
+
+    for (const match of results) {
+
+        if (
+            competition &&
+            match.competition !== competition
+        ) {
+            continue;
+        }
+
+
+        if (match.home) {
+            teams.add(match.home);
+        }
+
+        if (match.away) {
+            teams.add(match.away);
+        }
+
+    }
+
+
+    return Array
+        .from(teams)
+        .sort(
+            (a, b) =>
+                a.localeCompare(
+                    b,
+                    "ru"
+                )
+        );
+
+}
+
+
+/* ============================================================
+   UPDATE TEAM SELECTS
+   ============================================================
+ */
+
+function updateTeams() {
+
+    const competition =
+        competitionSelect.value;
+
+
+    const teams =
+        getTeamsForCompetition(
+            competition
+        );
+
+
+    const previousHome =
+        homeSelect.value;
+
+    const previousAway =
+        awaySelect.value;
+
+
+    homeSelect.innerHTML =
+        `<option value="">
+            Выберите команду
+        </option>`;
+
+
+    awaySelect.innerHTML =
+        `<option value="">
+            Выберите команду
+        </option>`;
+
+
+    for (const team of teams) {
+
+        const homeOption =
+            document.createElement(
+                "option"
+            );
+
+        homeOption.value =
+            team;
+
+        homeOption.textContent =
+            team;
+
+
+        const awayOption =
+            document.createElement(
+                "option"
+            );
+
+        awayOption.value =
+            team;
+
+        awayOption.textContent =
+            team;
+
+
+        homeSelect.appendChild(
+            homeOption
+        );
+
+        awaySelect.appendChild(
+            awayOption
+        );
+
+    }
+
+
+    if (
+        teams.includes(
+            previousHome
+        )
+    ) {
+
+        homeSelect.value =
+            previousHome;
+
+    }
+
+
+    if (
+        teams.includes(
+            previousAway
+        )
+    ) {
+
+        awaySelect.value =
+            previousAway;
+
+    }
+
+}
+
+
+/* ============================================================
+   RENDER RESULT
+   ============================================================
+ */
+
+function renderPrediction(prediction) {
+
+    result.classList.remove(
+        "hidden"
+    );
+
+
+    document.getElementById(
+        "resultHome"
+    ).textContent =
+        prediction.home;
+
+
+    document.getElementById(
+        "resultAway"
+    ).textContent =
+        prediction.away;
+
+
+    document.getElementById(
+        "probHome"
+    ).textContent =
+        percent(
+            prediction.probabilities1X2["1"]
+        );
+
+
+    document.getElementById(
+        "probDraw"
+    ).textContent =
+        percent(
+            prediction.probabilities1X2["X"]
+        );
+
+
+    document.getElementById(
+        "probAway"
+    ).textContent =
+        percent(
+            prediction.probabilities1X2["2"]
+        );
+
+
+    document.getElementById(
+        "lambdaHome"
+    ).textContent =
+        prediction.lambdaHome;
+
+
+    document.getElementById(
+        "lambdaAway"
+    ).textContent =
+        prediction.lambdaAway;
+
+
+    document.getElementById(
+        "bttsYes"
+    ).textContent =
+        percent(
+            prediction.btts.yes
+        );
+
+
+    document.getElementById(
+        "bttsNo"
+    ).textContent =
+        percent(
+            prediction.btts.no
+        );
+
+
+    document.getElementById(
+        "over15"
+    ).textContent =
+        percent(
+            prediction.totals.over15
+        );
+
+
+    document.getElementById(
+        "over25"
+    ).textContent =
+        percent(
+            prediction.totals.over25
+        );
+
+
+    document.getElementById(
+        "under25"
+    ).textContent =
+        percent(
+            prediction.totals.under25
+        );
+
+
+    document.getElementById(
+        "over35"
+    ).textContent =
+        percent(
+            prediction.totals.over35
+        );
+
+
+    renderScores(
+        prediction.topScores
+    );
+
+
+    renderTeamState(
+        prediction
+    );
+
+
+    renderExG(
+        prediction
+    );
+
+
+    renderBrainInfo(
+        prediction
+    );
+
+}
+
+
+/* ============================================================
+   SCORES
+   ============================================================
+ */
+
+function renderScores(scores) {
+
+    const container =
+        document.getElementById(
+            "scores"
+        );
+
+
+    if (
+        !Array.isArray(scores) ||
+        !scores.length
+    ) {
+
+        container.innerHTML =
+            "<div class='loading'>Нет данных</div>";
+
+        return;
+
+    }
+
+
+    container.innerHTML =
+        scores.map(
+            item => `
+
+                <div class="score-row">
+
+                    <span class="score">
+                        ${escapeHTML(
+                            item.score
+                        )}
+                    </span>
+
+                    <span class="score-prob">
+                        ${percent(
+                            item.probability
+                        )}
+                    </span>
+
+                </div>
+
+            `
+        ).join("");
+
+}
+
+
+/* ============================================================
+   TEAM STATE
+   ============================================================
+ */
+
+function renderTeamState(
+    prediction
+) {
+
+    const container =
+        document.getElementById(
+            "teamState"
+        );
+
+
+    const teams = [
+        prediction.state.home,
+        prediction.state.away
+    ];
+
+
+    container.innerHTML =
+        teams.map(
+            state => {
+
+                const form =
+                    state.form &&
+                    Array.isArray(
+                        state.form.sequence
+                    )
+                        ? state.form.sequence
+                            .map(
+                                item =>
+                                    item.result || "?"
+                            )
+                            .join(" ")
+                        : "—";
+
+
+                return `
+
+                    <div class="state-team">
+
+                        <div class="state-name">
+                            ${escapeHTML(
+                                state.team
+                            )}
+                        </div>
+
+                        <div class="state-row">
+                            <span>Матчи</span>
+                            <strong>
+                                ${state.matches}
+                            </strong>
+                        </div>
+
+                        <div class="state-row">
+                            <span>Забивает / матч</span>
+                            <strong>
+                                ${state.goalsForPerMatch ?? "—"}
+                            </strong>
+                        </div>
+
+                        <div class="state-row">
+                            <span>Пропускает / матч</span>
+                            <strong>
+                                ${state.goalsAgainstPerMatch ?? "—"}
+                            </strong>
+                        </div>
+
+                        <div class="state-row">
+                            <span>Форма</span>
+                            <strong class="form">
+                                ${escapeHTML(form)}
+                            </strong>
+                        </div>
+
+                        <div class="state-row">
+                            <span>Elo</span>
+                            <strong>
+                                ${state.elo ?? "—"}
+                            </strong>
+                        </div>
+
+                        <div class="state-row">
+                            <span>7 матчей — Rating</span>
+                            <strong>
+                                ${
+                                    state.evidence &&
+                                    state.evidence.sevenMatchThreshold
+                                        ? "ГОТОВ"
+                                        : "ЕЩЁ НЕТ"
+                                }
+                            </strong>
+                        </div>
+
+                    </div>
+
+                `;
+
+            }
+        ).join("");
+
+}
+
+
+/* ============================================================
+   EXG
+   ============================================================
+ */
+
+function renderExG(
+    prediction
+) {
+
+    const container =
+        document.getElementById(
+            "exgInfo"
+        );
+
+
+    const home =
+        prediction.state.home.estimatedXG;
+
+    const away =
+        prediction.state.away.estimatedXG;
+
+
+    container.innerHTML = `
+
+        <div class="metric-grid">
+
+            <div class="metric">
+
+                <div class="metric-label">
+                    ${escapeHTML(
+                        prediction.home
+                    )}
+                </div>
+
+                <div class="metric-value">
+                    ${
+                        home &&
+                        home.available
+                            ? home.estimatedXG
+                            : "—"
+                    }
+                </div>
+
+            </div>
+
+
+            <div class="metric">
+
+                <div class="metric-label">
+                    ${escapeHTML(
+                        prediction.away
+                    )}
+                </div>
+
+                <div class="metric-value">
+                    ${
+                        away &&
+                        away.available
+                            ? away.estimatedXG
+                            : "—"
+                    }
+                </div>
+
+            </div>
+
+        </div>
+
+        <div
+            class="loading"
+            style="margin-top:12px;"
+        >
+            Эксперимент FEG eXG v${
+                escapeHTML(
+                    FEG_EXG_VERSION
+                )
+            }.
+            Это оценка по историческим голам,
+            а не настоящий provider xG.
+        </div>
+
+    `;
+
+}
+
+
+/* ============================================================
+   BRAIN INFO
+   ============================================================
+ */
+
+function renderBrainInfo(
+    prediction
+) {
+
+    const container =
+        document.getElementById(
+            "brainInfo"
+        );
+
+
+    const quality =
+        prediction.dataQuality;
+
+
+    container.innerHTML = `
+
+        <div class="memory-line">
+            <span>Brain version</span>
+            <strong>
+                ${escapeHTML(
+                    prediction.brainVersion
+                )}
+            </strong>
+        </div>
+
+        <div class="memory-line">
+            <span>История для расчёта</span>
+            <strong>
+                ${prediction.trainingMatches}
+            </strong>
+        </div>
+
+        <div class="memory-line">
+            <span>Качество данных</span>
+            <strong>
+                ${
+                    quality
+                        ? percent(
+                            quality.score
+                        )
+                        : "—"
+                }
+            </strong>
+        </div>
+
+        <div class="memory-line">
+            <span>Самоизменение модели</span>
+            <strong>
+                НЕТ
+            </strong>
+        </div>
+
+        <div class="memory-line">
+            <span>Walk-forward</span>
+            <strong>
+                ГОТОВИМ
+            </strong>
+        </div>
+
+    `;
+
+}
+
+
+/* ============================================================
+   PREDICT
+   ============================================================
+ */
+
+function runPrediction() {
+
+    clearMessage();
+
+
+    if (!brain) {
+
+        showMessage(
+            "Super Brain ещё не загрузился."
+        );
+
+        return;
+
+    }
+
+
+    const home =
+        homeSelect.value;
+
+    const away =
+        awaySelect.value;
+
+    const competition =
+        competitionSelect.value;
+
+
+    if (!home || !away) {
+
+        showMessage(
+            "Выбери обе команды."
+        );
+
+        return;
+
+    }
+
+
+    if (home === away) {
+
+        showMessage(
+            "Хозяева и гости должны быть разными командами."
+        );
+
+        return;
+
+    }
+
+
+    predictButton.disabled =
+        true;
+
+    predictButton.textContent =
+        "🧠 BRAIN ДУМАЕТ...";
+
+
+    try {
+
+        const prediction =
+            brain.predict({
+                home,
+                away,
+                competition
+            });
+
+
+        if (
+            prediction.status !== "OK"
+        ) {
+
+            result.classList.add(
+                "hidden"
+            );
+
+
+            showMessage(
+                "Недостаточно данных для честного прогноза. " +
+                "FEG не будет придумывать отсутствующие данные.",
+                "error"
+            );
+
+            return;
+
+        }
+
+
+        renderPrediction(
+            prediction
+        );
+
+
+        showMessage(
+            "FEG Super Brain сформировал прогноз.",
+            "success"
+        );
+
+
+        window.lastFEGPrediction =
+            prediction;
+
+
+    } catch (error) {
+
+        console.error(error);
+
+        result.classList.add(
+            "hidden"
+        );
+
+        showMessage(
+            error.message ||
+            "Ошибка работы Brain."
+        );
+
+    } finally {
+
+        predictButton.disabled =
+            false;
+
+        predictButton.textContent =
+            "🧠 ДУМАТЬ";
+
+    }
+
+}
+
+
+/* ============================================================
+   SWAP
+   ============================================================
+ */
+
+function swapTeams() {
+
+    const home =
+        homeSelect.value;
+
+    const away =
+        awaySelect.value;
+
+
+    homeSelect.value =
+        away;
+
+    awaySelect.value =
+        home;
+
+}
+
+
+/* ============================================================
+   EVENTS
+   ============================================================
+ */
+
+competitionSelect.addEventListener(
+    "change",
+    updateTeams
+);
+
+predictButton.addEventListener(
+    "click",
+    runPrediction
+);
+
+swapButton.addEventListener(
+    "click",
+    swapTeams
+);
+
+
+/* ============================================================
+   START
+   ============================================================
+ */
+
+loadSystem();
+
+</script>
+
+</body>
+</html>
