@@ -1,0 +1,47 @@
+name: FEG Data Update
+
+on:
+  workflow_dispatch:
+
+  schedule:
+    - cron: "17 */6 * * *"
+
+permissions:
+  contents: write
+
+jobs:
+  update-data:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install requests
+
+      - name: Update football data
+        env:
+          FOOTBALL_DATA_TOKEN: ${{ secrets.FOOTBALL_DATA_TOKEN }}
+        run: |
+          python fetch_results.py
+
+      - name: Save updated memory
+        run: |
+          git config user.name "FEG Bot"
+          git config user.email "actions@github.com"
+
+          git add results.json memory.json
+
+          git diff --cached --quiet || git commit -m "FEG: update football data"
+
+      - name: Push changes
+        run: |
+          git push
