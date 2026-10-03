@@ -524,6 +524,17 @@
             margin-top: 10px;
         }
 
+        #learning-status {
+            font-size: 13px;
+            color: #cbd5ea;
+        }
+
+        #learning-status hr {
+            border: none;
+            border-top: 1px solid #202a40;
+            margin: 10px 0;
+        }
+
         .footer {
             text-align: center;
             color: #67748f;
@@ -701,6 +712,28 @@
             <div class="loading">
                 Загрузка памяти...
             </div>
+
+        </div>
+
+    </section>
+
+
+    <!-- =====================================================
+         LEARNING STATUS
+         ===================================================== -->
+
+    <section
+        class="card"
+        id="learning-status-card"
+    >
+
+        <div class="card-title">
+            🧠 Learning FEG
+        </div>
+
+        <div id="learning-status">
+
+            Проверка Learning Controller...
 
         </div>
 
@@ -4759,6 +4792,255 @@ document.addEventListener(
 
 setInterval(
     runFEGLearningController,
+    5 * 60 * 1000
+);
+
+
+/* ============================================================
+   FEG LEARNING STATUS PANEL
+   ============================================================
+ */
+
+function renderLearningStatus() {
+
+    const box =
+        document.getElementById(
+            "learning-status"
+        );
+
+
+    if (!box) {
+        return;
+    }
+
+
+    if (!window.FEGLearning) {
+
+        box.innerHTML = `
+
+            <div>
+
+                <strong>
+                    Learning Controller:
+                </strong>
+
+                ❌ НЕ ЗАГРУЖЕН
+
+            </div>
+
+        `;
+
+        return;
+
+    }
+
+
+    try {
+
+        const status =
+            window.FEGLearning.getStatus();
+
+
+        const facts =
+            Number(
+                status.processedFacts || 0
+            );
+
+
+        const stage =
+            status.stage || "UNKNOWN";
+
+
+        const cp88 =
+            status.checkpoints?.short88;
+
+
+        const cp264 =
+            status.checkpoints?.deep264;
+
+
+        const cp999 =
+            status.checkpoints?.laboratory999;
+
+
+        const challenger =
+            status.challenger;
+
+
+        function checkpointText(
+            checkpoint
+        ) {
+
+            if (!checkpoint) {
+                return "UNKNOWN";
+            }
+
+
+            return checkpoint.reached
+                ? "✅ PASSED"
+                : "⏳ WAITING";
+
+        }
+
+
+        box.innerHTML = `
+
+            <div style="line-height:1.8">
+
+                <div>
+
+                    <strong>
+                        Controller:
+                    </strong>
+
+                    ${status.version || "unknown"}
+
+                </div>
+
+
+                <div>
+
+                    <strong>
+                        Learning stage:
+                    </strong>
+
+                    ${stage}
+
+                </div>
+
+
+                <div>
+
+                    <strong>
+                        Processed facts:
+                    </strong>
+
+                    ${facts}
+
+                </div>
+
+
+                <hr>
+
+
+                <div>
+
+                    <strong>
+                        88 facts:
+                    </strong>
+
+                    ${checkpointText(cp88)}
+
+                </div>
+
+
+                <div>
+
+                    <strong>
+                        264 facts:
+                    </strong>
+
+                    ${checkpointText(cp264)}
+
+                </div>
+
+
+                <div>
+
+                    <strong>
+                        999 facts:
+                    </strong>
+
+                    ${checkpointText(cp999)}
+
+                </div>
+
+
+                <hr>
+
+
+                <div>
+
+                    <strong>
+                        Club Rating:
+                    </strong>
+
+                    ${
+                        window.FEGRATING
+                            ? "🟢 ACTIVE"
+                            : "🔴 NOT LOADED"
+                    }
+
+                </div>
+
+
+                <div>
+
+                    <strong>
+                        Challenger:
+                    </strong>
+
+                    ${
+                        challenger
+                            ? "🟡 CREATED / VALIDATION REQUIRED"
+                            : "⚪ NOT CREATED"
+                    }
+
+                </div>
+
+            </div>
+
+        `;
+
+    } catch (error) {
+
+        box.innerHTML = `
+
+            <div>
+
+                <strong>
+                    Learning Controller:
+                </strong>
+
+                ❌ ERROR
+
+            </div>
+
+            <small>
+                ${String(error)}
+            </small>
+
+        `;
+
+    }
+
+}
+
+
+/*
+ * Initial render.
+ */
+
+document.addEventListener(
+    "DOMContentLoaded",
+    function () {
+
+        setTimeout(
+            renderLearningStatus,
+            700
+        );
+
+    },
+    { once: true }
+);
+
+
+/*
+ * Refresh every 5 minutes.
+ */
+
+setInterval(
+    renderLearningStatus,
     5 * 60 * 1000
 );
 
