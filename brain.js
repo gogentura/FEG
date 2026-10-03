@@ -216,111 +216,8 @@ function matchDate(match) {
     return Number.isFinite(timestamp) ? timestamp : null;
 }
 
-
-/*
- * ============================================================
- * GOALS READING (FIX)
- * ============================================================
- *
- * Раньше brain.js читал только home_goals / away_goals.
- * Если results.json хранит счёт в другом формате
- * (score.fullTime.home, score.home, homeGoals, ...),
- * brain.js считал, что счёта нет, и превращал форму в "?".
- *
- * Теперь читаем счёт из нескольких источников,
- * как это уже делает index.html.
- */
-
-function readGoalNumber(value) {
-    if (finiteNumber(value)) {
-        return value;
-    }
-
-    if (
-        typeof value === "string" &&
-        value.trim() !== ""
-    ) {
-        const parsed = Number(value);
-
-        if (Number.isFinite(parsed)) {
-            return parsed;
-        }
-    }
-
-    return null;
-}
-
-function readHomeGoals(match) {
-    const candidates = [
-        match?.home_goals,
-        match?.homeGoals,
-        match?.goals_home,
-        match?.score?.home,
-        match?.score?.fullTime?.home,
-        match?.result?.home_goals
-    ];
-
-    for (const candidate of candidates) {
-        const value = readGoalNumber(candidate);
-
-        if (value !== null) {
-            return value;
-        }
-    }
-
-    return null;
-}
-
-function readAwayGoals(match) {
-    const candidates = [
-        match?.away_goals,
-        match?.awayGoals,
-        match?.goals_away,
-        match?.score?.away,
-        match?.score?.fullTime?.away,
-        match?.result?.away_goals
-    ];
-
-    for (const candidate of candidates) {
-        const value = readGoalNumber(candidate);
-
-        if (value !== null) {
-            return value;
-        }
-    }
-
-    return null;
-}
-
-
-/*
- * ============================================================
- * isFinished (FIX)
- * ============================================================
- *
- * Матч считается завершённым только если:
- *   - статус FINISHED / AWARDED
- *   - И присутствует числовой счёт.
- *
- * Матч со статусом FINISHED, но без счёта,
- * в статистику не попадает.
- *
- * Это защищает от "?" в форме и от искажённых средних.
- */
-
 function isFinished(match) {
-    const homeGoals = readHomeGoals(match);
-    const awayGoals = readAwayGoals(match);
-
-    if (
-        homeGoals === null ||
-        awayGoals === null
-    ) {
-        return false;
-    }
-
-    const status =
-        String(match?.status || "").toUpperCase();
+    const status = String(match?.status || "").toUpperCase();
 
     if (
         status === "FINISHED" ||
@@ -329,17 +226,11 @@ function isFinished(match) {
         return true;
     }
 
-    /*
-     * Если статус не указан,
-     * но счёт есть — считаем завершённым.
-     */
-    if (!status) {
-        return true;
-    }
-
-    return false;
+    return (
+        finiteNumber(match?.home_goals) &&
+        finiteNumber(match?.away_goals)
+    );
 }
-
 
 function matchBefore(match, asOf) {
     if (!asOf) {
@@ -435,23 +326,17 @@ function getLeagueMatches(results, competition, asOf = null) {
 function resultForTeam(match, team) {
     const isHome = match.home === team;
 
-    const homeGoals = readHomeGoals(match);
-    const awayGoals = readAwayGoals(match);
-
-    if (
-        homeGoals === null ||
-        awayGoals === null
-    ) {
-        return null;
-    }
-
     const gf = isHome
-        ? homeGoals
-        : awayGoals;
+        ? match.home_goals
+        : match.away_goals;
 
     const ga = isHome
-        ? awayGoals
-        : homeGoals;
+        ? match.away_goals
+        : match.home_goals;
+
+    if (!finiteNumber(gf) || !finiteNumber(ga)) {
+        return null;
+    }
 
     if (gf > ga) return "W";
     if (gf < ga) return "L";
@@ -494,12 +379,8 @@ function teamGoals(match, team) {
     const isHome = match.home === team;
 
     return {
-        gf: isHome
-            ? readHomeGoals(match)
-            : readAwayGoals(match),
-        ga: isHome
-            ? readAwayGoals(match)
-            : readHomeGoals(match)
+        gf: isHome ? match.home_goals : match.away_goals,
+        ga: isHome ? match.away_goals : match.home_goals
     };
 }
 
@@ -562,15 +443,12 @@ function getLeagueAverages(matches) {
     let awayGoals = [];
 
     for (const match of matches) {
-        const hg = readHomeGoals(match);
-        const ag = readAwayGoals(match);
-
         if (
-            finiteNumber(hg) &&
-            finiteNumber(ag)
+            finiteNumber(match.home_goals) &&
+            finiteNumber(match.away_goals)
         ) {
-            homeGoals.push(hg);
-            awayGoals.push(ag);
+            homeGoals.push(match.home_goals);
+            awayGoals.push(match.away_goals);
         }
     }
 
@@ -864,16 +742,6 @@ function buildEloRatings(
             continue;
         }
 
-        const homeGoals = readHomeGoals(match);
-        const awayGoals = readAwayGoals(match);
-
-        if (
-            homeGoals === null ||
-            awayGoals === null
-        ) {
-            continue;
-        }
-
         const homeRating =
             finiteNumber(ratings[home])
                 ? ratings[home]
@@ -888,8 +756,8 @@ function buildEloRatings(
             eloUpdate(
                 homeRating,
                 awayRating,
-                homeGoals,
-                awayGoals
+                match.home_goals,
+                match.away_goals
             );
 
         ratings[home] = updated.home;
