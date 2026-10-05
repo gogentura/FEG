@@ -20,8 +20,12 @@ import requests
 #   2. Подтверждённый факт не заменяется неполными данными.
 #   3. Missing != 0.
 #   4. Будущие матчи можно обновлять.
-#   5. FINISHED/AWARDED факт с голами защищён.
-#   6. results.json — источник исторических фактов для Brain.
+#   5. FINISHED/AWARDED без счёта сохраняется.
+#   6. FINISHED/AWARDED факт с голами защищён.
+#   7. Если счёт появился позже — запись обновляется на месте.
+#   8. null никогда не превращается в 0.
+#   9. results.json хранит историческую последовательность.
+#  10. Сырые данные score диагностируются до normalize.
 # ============================================================
 
 
@@ -52,9 +56,6 @@ COMPETITIONS = {
 
     # --------------------------------------------------------
     # ADDITIONAL EUROPEAN LEAGUES
-    #
-    # Нужны прежде всего для истории клубов,
-    # участвующих в Champions League.
     # --------------------------------------------------------
 
     "PPL": "Primeira Liga",
@@ -135,6 +136,20 @@ def has_full_time_score(match):
     )
 
 
+def has_raw_full_time_score(match):
+    """
+    Проверяет именно сырой ответ football-data.org.
+    """
+
+    score = match.get("score") or {}
+    full_time = score.get("fullTime") or {}
+
+    return (
+        is_number(full_time.get("home"))
+        and is_number(full_time.get("away"))
+    )
+
+
 def is_finished_status(status):
     return str(status or "").upper() in {
         "FINISHED",
@@ -146,12 +161,158 @@ def is_finished_fact(match):
     """
     FINISHED/AWARDED с полным счётом
     считаем подтверждённым фактом.
+
+    FINISHED без счёта НЕ является фактом,
+    но сам матч всё равно сохраняется в results.json.
     """
 
     return (
         is_finished_status(match.get("status"))
         and has_full_time_score(match)
     )
+
+
+def match_label(match):
+    """
+    Удобное имя матча для диагностических логов.
+    """
+
+    home = match.get("home") or "?"
+    away = match.get("away") or "?"
+
+    return f"{home} — {away}"
+
+
+# ============================================================
+# RAW API DIAGNOSTICS
+# ============================================================
+
+def diagnose_raw_match(
+    match,
+    competition,
+    competition_name,
+):
+    """
+    Диагностика ДО normalize_match().
+
+    Здесь мы смотрим, что реально пришло
+    от football-data.org.
+    """
+
+    status = str(
+        match.get("status") or ""
+    ).upper()
+
+    if not is_finished_status(status):
+        return False
+
+    score = match.get("score") or {}
+
+    full_time = (
+        score.get("fullTime") or {}
+    )
+
+    half_time = (
+        score.get("halfTime") or {}
+    )
+
+    extra_time = (
+        score.get("extraTime") or {}
+    )
+
+    penalties = (
+        score.get("penalties") or {}
+    )
+
+    full_home = full_time.get("home")
+    full_away = full_time.get("away")
+
+    match_id = match.get("id")
+
+    # --------------------------------------------------------
+    # Нормальный FINISHED с полным счётом.
+    # --------------------------------------------------------
+
+    if (
+        is_number(full_home)
+        and is_number(full_away)
+    ):
+        return False
+
+    # --------------------------------------------------------
+    # FINISHED/AWARDED БЕЗ ПОЛНОГО СЧЁТА.
+    # --------------------------------------------------------
+
+    print()
+    print(
+        "⚠️ FINISHED без счёта"
+    )
+
+    print(
+        f"   Турнир: {competition_name} "
+        f"({competition})"
+    )
+
+    print(
+        f"   Match ID: {match_id}"
+    )
+
+    print(
+        f"   Дата: "
+        f"{match.get('utcDate')}"
+    )
+
+    print(
+        f"   Статус: {status}"
+    )
+
+    print(
+        f"   Home: "
+        f"{(match.get('homeTeam') or {}).get('name')}"
+    )
+
+    print(
+        f"   Away: "
+        f"{(match.get('awayTeam') or {}).get('name')}"
+    )
+
+    print(
+        f"   raw score: "
+        f"{json.dumps(score, ensure_ascii=False)}"
+    )
+
+    print(
+        f"   fullTime: "
+        f"home={full_home}, "
+        f"away={full_away}"
+    )
+
+    print(
+        f"   halfTime: "
+        f"home={half_time.get('home')}, "
+        f"away={half_time.get('away')}"
+    )
+
+    print(
+        f"   extraTime: "
+        f"home={extra_time.get('home')}, "
+        f"away={extra_time.get('away')}"
+    )
+
+    print(
+        f"   penalties: "
+        f"home={penalties.get('home')}, "
+        f"away={penalties.get('away')}"
+    )
+
+    print(
+        "   → Матч будет сохранён в results.json "
+        "с null вместо счёта."
+    )
+
+    print()
+
+    return True
 
 
 # ============================================================
@@ -237,6 +398,14 @@ def normalize_match(
         "home": home.get("name"),
         "away": away.get("name"),
 
+        # ----------------------------------------------------
+        # ВАЖНО:
+        # Если fullTime отсутствует,
+        # сохраняем None.
+        #
+        # Никаких 0.
+        # ----------------------------------------------------
+
         "home_goals": full_time.get("home"),
         "away_goals": full_time.get("away"),
 
@@ -278,11 +447,21 @@ def merge_match(old_match, new_match):
     """
     Безопасное объединение одного матча.
 
-    Основной принцип:
+    Главные правила:
 
-        старый подтверждённый факт
-        НЕ МОЖЕТ
-        быть заменён неполным новым ответом API.
+        1. Старый подтверждённый факт
+           НЕ МОЖЕТ быть заменён null.
+
+        2. Старый матч без счёта
+           МОЖЕТ получить счёт позже.
+
+        3. Известный счёт не может
+           быть уничтожен неполными данными.
+
+        4. None не затирает существующее
+           значение.
+
+    Это обеспечивает update-in-place.
     """
 
     if not old_match:
@@ -299,17 +478,73 @@ def merge_match(old_match, new_match):
         new_match
     )
 
+    old_has_score = has_full_time_score(
+        old_match
+    )
+
+    new_has_score = has_full_time_score(
+        new_match
+    )
+
     # --------------------------------------------------------
-    # Старый факт уже подтверждён.
+    # ДИАГНОСТИКА:
     #
-    # Новый ответ не должен его уничтожить.
+    # Был FINISHED без счёта,
+    # теперь пришёл FINISHED со счётом.
+    # --------------------------------------------------------
+
+    if (
+        not old_has_score
+        and new_has_score
+        and is_finished_status(
+            old_match.get("status")
+        )
+        and is_finished_status(
+            new_match.get("status")
+        )
+    ):
+        print()
+        print(
+            "✅ СЧЁТ ПОЯВИЛСЯ — "
+            "обновляем существующий матч"
+        )
+
+        print(
+            f"   Матч: "
+            f"{match_label(new_match)}"
+        )
+
+        print(
+            f"   ID: "
+            f"{new_match.get('id')}"
+        )
+
+        print(
+            f"   Было: "
+            f"{old_match.get('home_goals')}:"
+            f"{old_match.get('away_goals')}"
+        )
+
+        print(
+            f"   Стало: "
+            f"{new_match.get('home_goals')}:"
+            f"{new_match.get('away_goals')}"
+        )
+
+        print()
+
+    # --------------------------------------------------------
+    # Старый подтверждённый факт.
+    #
+    # Новый ответ НЕ может его уничтожить.
     # --------------------------------------------------------
 
     if old_is_fact and not new_is_fact:
+
         merged = dict(old_match)
 
-        # Безопасно обновляем только поля,
-        # которые не могут уничтожить факт.
+        # Безопасно обновляем только метаданные,
+        # которые не уничтожают подтверждённый счёт.
 
         for key in [
             "competition_name",
@@ -318,6 +553,7 @@ def merge_match(old_match, new_match):
             "stage",
             "home",
             "away",
+            "status",
         ]:
             value = new_match.get(key)
 
@@ -329,11 +565,12 @@ def merge_match(old_match, new_match):
     # --------------------------------------------------------
     # Оба являются полноценными фактами.
     #
-    # Новый факт может содержать более свежую информацию.
-    # Но существующие значения не заменяем на None.
+    # Новый факт может содержать более свежую
+    # информацию, но None не принимаем.
     # --------------------------------------------------------
 
     if old_is_fact and new_is_fact:
+
         merged = dict(old_match)
 
         for key, value in new_match.items():
@@ -343,9 +580,12 @@ def merge_match(old_match, new_match):
 
             merged[key] = value
 
-        # На всякий случай сохраняем старый счёт,
-        # если новый вдруг оказался некорректным.
+        # ----------------------------------------------------
+        # Защита счёта.
+        # ----------------------------------------------------
+
         if not has_full_time_score(merged):
+
             merged["home_goals"] = (
                 old_match.get("home_goals")
             )
@@ -359,12 +599,24 @@ def merge_match(old_match, new_match):
     # --------------------------------------------------------
     # Старой подтверждённой фактической записи нет.
     #
-    # Можно принять новые данные.
+    # Это главный путь для:
+    #
+    # FINISHED null:null
+    #       ↓
+    # FINISHED 3:1
+    #
+    # Старый матч обновляется на месте.
     # --------------------------------------------------------
 
     merged = dict(old_match)
 
     for key, value in new_match.items():
+
+        # ----------------------------------------------------
+        # Missing != 0
+        #
+        # None не должен уничтожать уже известное значение.
+        # ----------------------------------------------------
 
         if value is None:
             continue
@@ -382,6 +634,13 @@ def merge_results(
     Объединяет всю историю.
 
     Старые записи никогда не удаляются.
+
+    Ключ:
+        id = fd:<football-data match id>
+
+    Поэтому матч с null сначала создаётся,
+    а затем обновляется на том же месте,
+    когда API отдаёт счёт.
     """
 
     by_id = {}
@@ -406,6 +665,9 @@ def merge_results(
     # Затем аккуратно применяем свежие данные.
     # --------------------------------------------------------
 
+    updated_existing = 0
+    inserted_new = 0
+
     for match in new_results:
 
         if not isinstance(match, dict):
@@ -417,12 +679,23 @@ def merge_results(
             continue
 
         if match_id in by_id:
-            by_id[match_id] = merge_match(
-                by_id[match_id],
+
+            old_match = by_id[match_id]
+
+            merged = merge_match(
+                old_match,
                 match,
             )
+
+            by_id[match_id] = merged
+
+            updated_existing += 1
+
         else:
+
             by_id[match_id] = match
+
+            inserted_new += 1
 
     result = list(
         by_id.values()
@@ -435,6 +708,26 @@ def merge_results(
         )
     )
 
+    print()
+    print(
+        "MERGE:"
+    )
+
+    print(
+        f"  Обновлено существующих: "
+        f"{updated_existing}"
+    )
+
+    print(
+        f"  Добавлено новых: "
+        f"{inserted_new}"
+    )
+
+    print(
+        f"  Итоговых записей: "
+        f"{len(result)}"
+    )
+
     return result
 
 
@@ -443,6 +736,20 @@ def merge_results(
 # ============================================================
 
 def build_memory(results):
+    """
+    MEMORY строится только из подтверждённых фактов.
+
+    Матч:
+        FINISHED + null:null
+
+    остаётся в results.json,
+    но НЕ считается фактом в memory.json.
+
+    Это принципиально:
+        Missing != 0
+        Missing != результат
+    """
+
     teams = {}
 
     finished = [
@@ -519,14 +826,17 @@ def build_memory(results):
         # ----------------------------------------------------
 
         if hg > ag:
+
             home_result = "W"
             away_result = "L"
 
         elif hg < ag:
+
             home_result = "L"
             away_result = "W"
 
         else:
+
             home_result = "D"
             away_result = "D"
 
@@ -594,10 +904,22 @@ def build_memory(results):
 # ============================================================
 
 def print_diagnostics(results):
+
     finished = [
         match
         for match in results
         if is_finished_fact(match)
+    ]
+
+    finished_without_score = [
+        match
+        for match in results
+        if (
+            is_finished_status(
+                match.get("status")
+            )
+            and not has_full_time_score(match)
+        )
     ]
 
     print()
@@ -612,6 +934,11 @@ def print_diagnostics(results):
     print(
         f"Завершённых фактов: "
         f"{len(finished)}"
+    )
+
+    print(
+        f"FINISHED/AWARDED без счёта: "
+        f"{len(finished_without_score)}"
     )
 
     teams = {}
@@ -635,6 +962,31 @@ def print_diagnostics(results):
         f"Команд с фактами: "
         f"{len(teams)}"
     )
+
+    # --------------------------------------------------------
+    # Показываем несколько матчей без счёта,
+    # которые реально хранятся в results.json.
+    # --------------------------------------------------------
+
+    if finished_without_score:
+
+        print()
+        print(
+            "Примеры FINISHED без счёта:"
+        )
+
+        for match in finished_without_score[:20]:
+
+            print(
+                f"  {match.get('id')} | "
+                f"{match.get('date')} | "
+                f"{match.get('home')} — "
+                f"{match.get('away')} | "
+                f"status={match.get('status')} | "
+                f"score="
+                f"{match.get('home_goals')}:"
+                f"{match.get('away_goals')}"
+            )
 
     print()
 
@@ -671,6 +1023,7 @@ def main():
     )
 
     if not isinstance(old_results, list):
+
         print(
             "Предупреждение: "
             "results.json имеет некорректный формат."
@@ -689,6 +1042,8 @@ def main():
 
     failed_competitions = 0
 
+    raw_finished_without_score = 0
+
     # ========================================================
     # DOWNLOAD
     # ========================================================
@@ -697,6 +1052,7 @@ def main():
         COMPETITIONS.items()
     ):
 
+        print()
         print(
             f"Получаем данные: "
             f"{competition_name} "
@@ -733,6 +1089,26 @@ def main():
                 continue
 
             successful_competitions += 1
+
+            # ------------------------------------------------
+            # Сначала диагностируем RAW API.
+            #
+            # Это важно: после normalize мы уже не видим
+            # исходный score целиком.
+            # ------------------------------------------------
+
+            for match in matches:
+
+                if diagnose_raw_match(
+                    match,
+                    competition,
+                    competition_name,
+                ):
+                    raw_finished_without_score += 1
+
+            # ------------------------------------------------
+            # Затем normalize.
+            # ------------------------------------------------
 
             for match in matches:
 
@@ -774,10 +1150,14 @@ def main():
         time.sleep(7)
 
     # ========================================================
-    # SAFETY CHECK
+    # DOWNLOAD SUMMARY
     # ========================================================
 
     print()
+    print(
+        "=" * 60
+    )
+
     print(
         f"Успешных турниров: "
         f"{successful_competitions}"
@@ -791,6 +1171,16 @@ def main():
     print(
         f"Новых записей получено: "
         f"{len(new_results)}"
+    )
+
+    print(
+        f"FINISHED/AWARDED без счёта "
+        f"в RAW API: "
+        f"{raw_finished_without_score}"
+    )
+
+    print(
+        "=" * 60
     )
 
     # --------------------------------------------------------
