@@ -1112,9 +1112,21 @@
 </div>
 
 
-<script src="brain.js"></script>
-<script src="rating.js"></script>
-<script src="learning_controller.js"></script>
+<!-- ============================================================
+     SCRIPTS
+     ============================================================
+     ВАЖНО:
+     параметр ?v=... заставляет браузер и GitHub Pages
+     считать файл новым ресурсом, а не брать старый кэш.
+
+     Когда меняешь brain.js / rating.js /
+     learning_controller.js — просто увеличивай
+     соответствующую версию, например 0.1.0-3 → 0.1.0-4.
+     ============================================================ -->
+
+<script src="brain.js?v=0.1.0-3"></script>
+<script src="rating.js?v=0.1.0-3"></script>
+<script src="learning_controller.js?v=0.1.0-3"></script>
 
 
 <script>
@@ -1149,21 +1161,8 @@ const FEG_FACT_REFRESH_MS =
     5 * 60 * 1000;
 
 
-/*
- * Сколько прогнозов показываем по умолчанию
- * и на сколько раскрываем за один клик.
- */
-
 const FEG_JOURNAL_PAGE_SIZE = 10;
 
-
-/*
- * Сколько прогнозов сейчас раскрыто.
- *
- * Модульная переменная, чтобы состояние
- * сохранялось между перерисовками
- * (например, при обновлении фактов).
- */
 
 let journalVisibleCount = FEG_JOURNAL_PAGE_SIZE;
 
@@ -2417,15 +2416,6 @@ function renderAnalysisRow(
 }
 
 
-/*
- * ============================================================
- * JOURNAL TOGGLE
- * ============================================================
- *
- * Раскрывает ещё 10 прогнозов.
- * Если уже раскрыты все — сворачивает до 10.
- */
-
 function toggleJournalVisible() {
 
     const journal =
@@ -2441,18 +2431,10 @@ function toggleJournalVisible() {
         total
     ) {
 
-        /*
-         * Сворачиваем до 10.
-         */
-
         journalVisibleCount =
             FEG_JOURNAL_PAGE_SIZE;
 
     } else {
-
-        /*
-         * Раскрываем ещё 10.
-         */
 
         journalVisibleCount =
             Math.min(
@@ -2483,13 +2465,6 @@ function renderJournal() {
 
     if (!journal.length) {
 
-        /*
-         * Если журнал пуст — сбрасываем
-         * счётчик видимости, чтобы при
-         * появлении новых записей
-         * он начинался с 10.
-         */
-
         journalVisibleCount =
             FEG_JOURNAL_PAGE_SIZE;
 
@@ -2515,14 +2490,6 @@ function renderJournal() {
     const total =
         journal.length;
 
-
-    /*
-     * Защита: если в журнале стало меньше
-     * записей, чем сохранённый счётчик
-     * видимости (например, пользователь
-     * удалил прогнозы), аккуратно
-     * уменьшаем счётчик.
-     */
 
     if (
         journalVisibleCount >
@@ -2567,11 +2534,6 @@ function renderJournal() {
                 "FINISHED"
         ).length;
 
-
-    /*
-     * Показываем журнал с конца (свежие сверху),
-     * берём только journalVisibleCount записей.
-     */
 
     const visible =
         journal
@@ -2979,13 +2941,6 @@ function renderJournal() {
         .join("");
 
 
-    /*
-     * Кнопка раскрытия / сворачивания.
-     *
-     * Показываем, только если прогнозов
-     * больше, чем одна страница (10).
-     */
-
     if (
         total > FEG_JOURNAL_PAGE_SIZE
     ) {
@@ -3063,10 +3018,6 @@ function renderJournal() {
         html;
 
 
-    /*
-     * Кнопки удаления.
-     */
-
     container
         .querySelectorAll(
             "[data-delete-prediction]"
@@ -3089,10 +3040,6 @@ function renderJournal() {
             }
         );
 
-
-    /*
-     * Кнопка раскрытия / сворачивания.
-     */
 
     const toggleButton =
         document.getElementById(
@@ -4486,10 +4433,6 @@ function runPrediction() {
         window.lastFEGPrediction =
             prediction;
 
-
-        /*
-         * Автоскролл к прогнозу — как договорились.
-         */
 
         try {
 
