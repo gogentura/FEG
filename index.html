@@ -177,6 +177,28 @@
             font-size: 12px;
         }
 
+        .journal-toggle {
+            width: 100%;
+            min-height: 40px;
+            margin-top: 10px;
+            background: #1a2540;
+            color: #cbd5ea;
+            border: 1px solid #2a3653;
+            font-size: 12px;
+        }
+
+        .journal-toggle:hover {
+            opacity: .92;
+        }
+
+        .journal-visible {
+            color: #7180a1;
+            font-size: 10px;
+            margin-top: 8px;
+            text-align: center;
+            letter-spacing: .5px;
+        }
+
         .hidden {
             display: none !important;
         }
@@ -1127,6 +1149,25 @@ const FEG_FACT_REFRESH_MS =
     5 * 60 * 1000;
 
 
+/*
+ * Сколько прогнозов показываем по умолчанию
+ * и на сколько раскрываем за один клик.
+ */
+
+const FEG_JOURNAL_PAGE_SIZE = 10;
+
+
+/*
+ * Сколько прогнозов сейчас раскрыто.
+ *
+ * Модульная переменная, чтобы состояние
+ * сохранялось между перерисовками
+ * (например, при обновлении фактов).
+ */
+
+let journalVisibleCount = FEG_JOURNAL_PAGE_SIZE;
+
+
 /* ============================================================
    JOURNAL STORAGE
    ============================================================
@@ -1525,16 +1566,6 @@ function findFactForPrediction(
         }
 
 
-        /*
-         * Очень важное правило:
-         *
-         * матч должен быть после момента
-         * создания прогноза.
-         *
-         * Поэтому старый матч не сможет
-         * случайно закрыть новый прогноз.
-         */
-
         if (
             matchDate.getTime() <=
             createdAt.getTime()
@@ -1557,12 +1588,6 @@ function findFactForPrediction(
             );
 
 
-        /*
-         * Без фактического счёта
-         * матч ещё не является фактом
-         * для Evaluator.
-         */
-
         if (
             homeGoals === null ||
             awayGoals === null
@@ -1572,11 +1597,6 @@ function findFactForPrediction(
 
         }
 
-
-        /*
-         * Если статус явно указан
-         * и матч не завершён — не закрываем.
-         */
 
         const status =
             getMatchStatus(
@@ -1626,12 +1646,6 @@ function findFactForPrediction(
         return null;
     }
 
-
-    /*
-     * Если есть несколько будущих матчей
-     * с теми же командами, берём ближайший
-     * после времени прогноза.
-     */
 
     candidates.sort(
         (a, b) =>
@@ -2132,14 +2146,6 @@ function evaluateJournalAgainstResults() {
         journal.map(
             entry => {
 
-                /*
-                 * Если запись уже закрыта,
-                 * не пересчитываем её.
-                 *
-                 * Исторический анализ
-                 * остаётся неизменным.
-                 */
-
                 if (
                     entry.status ===
                     "FINISHED" &&
@@ -2150,12 +2156,6 @@ function evaluateJournalAgainstResults() {
 
                 }
 
-
-                /*
-                 * Удалённые записи сюда
-                 * в нормальном режиме не попадут,
-                 * но дополнительно защищаемся.
-                 */
 
                 if (
                     entry.status ===
@@ -2417,6 +2417,58 @@ function renderAnalysisRow(
 }
 
 
+/*
+ * ============================================================
+ * JOURNAL TOGGLE
+ * ============================================================
+ *
+ * Раскрывает ещё 10 прогнозов.
+ * Если уже раскрыты все — сворачивает до 10.
+ */
+
+function toggleJournalVisible() {
+
+    const journal =
+        loadPredictionJournal();
+
+
+    const total =
+        journal.length;
+
+
+    if (
+        journalVisibleCount >=
+        total
+    ) {
+
+        /*
+         * Сворачиваем до 10.
+         */
+
+        journalVisibleCount =
+            FEG_JOURNAL_PAGE_SIZE;
+
+    } else {
+
+        /*
+         * Раскрываем ещё 10.
+         */
+
+        journalVisibleCount =
+            Math.min(
+                journalVisibleCount +
+                FEG_JOURNAL_PAGE_SIZE,
+                total
+            );
+
+    }
+
+
+    renderJournal();
+
+}
+
+
 function renderJournal() {
 
     const container =
@@ -2430,6 +2482,17 @@ function renderJournal() {
 
 
     if (!journal.length) {
+
+        /*
+         * Если журнал пуст — сбрасываем
+         * счётчик видимости, чтобы при
+         * появлении новых записей
+         * он начинался с 10.
+         */
+
+        journalVisibleCount =
+            FEG_JOURNAL_PAGE_SIZE;
+
 
         container.innerHTML = `
 
@@ -2453,6 +2516,42 @@ function renderJournal() {
         journal.length;
 
 
+    /*
+     * Защита: если в журнале стало меньше
+     * записей, чем сохранённый счётчик
+     * видимости (например, пользователь
+     * удалил прогнозы), аккуратно
+     * уменьшаем счётчик.
+     */
+
+    if (
+        journalVisibleCount >
+        total
+    ) {
+
+        journalVisibleCount =
+            Math.min(
+                total,
+                Math.max(
+                    FEG_JOURNAL_PAGE_SIZE,
+                    journalVisibleCount
+                )
+            );
+
+    }
+
+
+    if (
+        journalVisibleCount <
+        FEG_JOURNAL_PAGE_SIZE
+    ) {
+
+        journalVisibleCount =
+            FEG_JOURNAL_PAGE_SIZE;
+
+    }
+
+
     const finished =
         journal.filter(
             item =>
@@ -2469,11 +2568,29 @@ function renderJournal() {
         ).length;
 
 
-    const recent =
+    /*
+     * Показываем журнал с конца (свежие сверху),
+     * берём только journalVisibleCount записей.
+     */
+
+    const visible =
         journal
             .slice()
             .reverse()
-            .slice(0, 10);
+            .slice(0, journalVisibleCount);
+
+
+    const shownCount =
+        visible.length;
+
+
+    const hasMore =
+        shownCount < total;
+
+
+    const isFullyExpanded =
+        shownCount >= total &&
+        total > FEG_JOURNAL_PAGE_SIZE;
 
 
     let html = `
@@ -2523,7 +2640,7 @@ function renderJournal() {
     `;
 
 
-    html += recent
+    html += visible
         .map(
             entry => {
 
@@ -2862,6 +2979,66 @@ function renderJournal() {
         .join("");
 
 
+    /*
+     * Кнопка раскрытия / сворачивания.
+     *
+     * Показываем, только если прогнозов
+     * больше, чем одна страница (10).
+     */
+
+    if (
+        total > FEG_JOURNAL_PAGE_SIZE
+    ) {
+
+        let toggleLabel;
+
+
+        if (isFullyExpanded) {
+
+            toggleLabel =
+                "🔼 Свернуть до " +
+                FEG_JOURNAL_PAGE_SIZE;
+
+        } else {
+
+            const remaining =
+                total - shownCount;
+
+
+            const nextBatch =
+                Math.min(
+                    FEG_JOURNAL_PAGE_SIZE,
+                    remaining
+                );
+
+
+            toggleLabel =
+                "📜 Показать ещё " +
+                nextBatch;
+
+        }
+
+
+        html += `
+
+            <button
+                id="journalToggleButton"
+                class="journal-toggle"
+            >
+                ${toggleLabel}
+            </button>
+
+            <div class="journal-visible">
+
+                Показано ${shownCount} из ${total}
+
+            </div>
+
+        `;
+
+    }
+
+
     html += `
 
         <div class="journal-note">
@@ -2887,8 +3064,7 @@ function renderJournal() {
 
 
     /*
-     * Кнопки удаления подключаем
-     * после построения HTML.
+     * Кнопки удаления.
      */
 
     container
@@ -2912,6 +3088,26 @@ function renderJournal() {
 
             }
         );
+
+
+    /*
+     * Кнопка раскрытия / сворачивания.
+     */
+
+    const toggleButton =
+        document.getElementById(
+            "journalToggleButton"
+        );
+
+
+    if (toggleButton) {
+
+        toggleButton.addEventListener(
+            "click",
+            toggleJournalVisible
+        );
+
+    }
 
 }
 
@@ -3127,18 +3323,10 @@ async function refreshFactsAndEvaluate(
             loadedResults;
 
 
-        /*
-         * Сначала обновляем команды/память.
-         */
-
         renderMemory();
 
         updateTeams();
 
-
-        /*
-         * Затем запускаем Evaluator.
-         */
 
         const evaluation =
             evaluateJournalAgainstResults();
@@ -3286,12 +3474,6 @@ async function loadSystem() {
 
         renderMemory();
 
-
-        /*
-         * При каждом открытии страницы
-         * сразу проверяем, не появился ли
-         * новый факт.
-         */
 
         evaluateJournalAgainstResults();
 
@@ -4250,12 +4432,6 @@ function runPrediction() {
 
     try {
 
-        /*
-         * ====================================================
-         * BRAIN
-         * ====================================================
-         */
-
         const prediction =
             brain.predict({
 
@@ -4267,12 +4443,6 @@ function runPrediction() {
 
             });
 
-
-        /*
-         * ====================================================
-         * VALIDATION
-         * ====================================================
- */
 
         if (
             prediction.status !==
@@ -4299,28 +4469,11 @@ function runPrediction() {
         }
 
 
-        /*
-         * ====================================================
-         * SAVE THOUGHT
-         * ====================================================
-         *
-         * Прогноз сохраняется как отдельная
-         * неизменяемая копия.
-         *
-         * Будущий результат здесь отсутствует.
-         */
-
         const journalResult =
             recordPrediction(
                 prediction
             );
 
-
-        /*
-         * ====================================================
-         * SHOW RESULT
-         * ====================================================
- */
 
         renderPrediction(
             prediction
@@ -4335,14 +4488,7 @@ function runPrediction() {
 
 
         /*
-         * ====================================================
-         * NEW: SCROLL TO RESULT
-         * ====================================================
-         *
-         * Прогноз теперь отображается сразу после
-         * селектора — прокручиваем страницу к нему,
-         * чтобы пользователю не приходилось
-         * листать вниз вручную.
+         * Автоскролл к прогнозу — как договорились.
          */
 
         try {
@@ -4361,12 +4507,6 @@ function runPrediction() {
 
         }
 
-
-        /*
-         * ====================================================
-         * MESSAGE
-         * ====================================================
- */
 
         if (
             journalResult.saved
@@ -4476,15 +4616,6 @@ function predictionFingerprint(
         prediction?.competition || "";
 
 
-    /*
-     * Если brain.js не отдаёт asOf,
-     * используем момент записи.
-     *
-     * Поэтому две разные мысли,
-     * сделанные в разное время,
-     * не считаются одинаковыми.
-     */
-
     const asOf =
         prediction?.asOf ||
         prediction?.predictionTime ||
@@ -4575,21 +4706,10 @@ function recordPrediction(
             new Date().toISOString(),
 
         fingerprint:
-
             fingerprint,
 
         status:
             "OPEN",
-
-        /*
-         * ВАЖНО:
-         *
-         * JSON-копия фиксирует именно
-         * состояние Brain в момент прогноза.
-         *
-         * Будущие изменения brain.js
-         * эту запись не изменят.
-         */
 
         prediction:
             JSON.parse(
@@ -4689,20 +4809,6 @@ refreshJournalButton.addEventListener(
 /* ============================================================
    AUTOMATIC FACT CHECK
    ============================================================
- *
- * Пока страница открыта, FEG каждые 5 минут
- * проверяет свежий results.json.
- *
- * Это НЕ обучение.
- *
- * Это только:
- *
- * results.json
- *      ↓
- * Prediction Evaluator
- *      ↓
- * сравнение
- *
  */
 
 setInterval(
