@@ -795,8 +795,25 @@ function buildTeamState(
             return match.competition === competition;
         });
 
+    /*
+     * IMPORTANT FEG FIX:
+     *
+     * Если в текущем соревновании уже есть минимум
+     * CONFIG.minMatches матчей, используем их.
+     *
+     * Если матчей в текущем соревновании меньше
+     * минимального порога, используем общую историю
+     * команды до даты прогноза.
+     *
+     * Это позволяет прогнозировать ЛЧ для команд,
+     * у которых пока мало матчей именно в ЛЧ,
+     * используя уже накопленную историю чемпионата
+     * и других доступных официальных матчей.
+     *
+     * Формула Brain при этом НЕ меняется.
+     */
     const matches =
-        competitionMatches.length
+        competitionMatches.length >= CONFIG.minMatches
             ? competitionMatches
             : allMatches;
 
