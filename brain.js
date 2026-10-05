@@ -13,6 +13,43 @@
  *   5. FEG Estimated xG (eXG) — ЭКСПЕРИМЕНТ,
  *      а не настоящий provider xG.
  *   6. Brain не переписывает сам себя после одного матча.
+ *
+ * Вход:
+ *   results.json
+ *   memory.json (опционально)
+ *
+ * Основной интерфейс:
+ *
+ *   const brain = new FEGBRAIN(results, memory);
+ *
+ *   const prediction = brain.predict({
+ *       home: "FC Barcelona",
+ *       away: "Real Madrid",
+ *       competition: "PD"
+ *   });
+ *
+ * ------------------------------------------------------------
+ * FEG eXG v0.1
+ *
+ * Последние 6 матчей:
+ *
+ *   oldest -> newest
+ *
+ *   match 1 = 1
+ *   match 2 = 2
+ *   match 3 = 3
+ *   match 4 = 1
+ *   match 5 = 3
+ *   match 6 = 4
+ *
+ * Это экспериментальная модель стабильности.
+ *
+ * ВАЖНО:
+ *   Это НЕ настоящий xG.
+ *   Пока provider xG отсутствует, eXG строится из
+ *   доступных результативных данных.
+ *
+ * ------------------------------------------------------------
  */
 
 "use strict";
@@ -26,15 +63,30 @@ const CONFIG = Object.freeze({
     minMatches: 3,
     formMatches: 5,
     exgMatches: 6,
+
+    // Экспериментальные веса eXG:
+    // старый -> новый
     exgWeights: Object.freeze([1, 2, 3, 1, 3, 4]),
+
+    // Сглаживание атакующих/защитных параметров.
     regularization: 2,
+
+    // Ограничения lambda.
     minLambda: 0.15,
     maxLambda: 5.0,
+
+    // Poisson matrix.
     maxGoals: 9,
+
+    // Домашнее преимущество.
     homeAdvantage: 1.08,
+
+    // Elo.
     eloStart: 1500,
     eloK: 20,
     eloHomeAdvantage: 60,
+
+    // Не позволяем одному матчу резко менять оценку.
     maxExgStabilityBonus: 0.25
 });
 
@@ -164,107 +216,8 @@ function matchDate(match) {
     return Number.isFinite(timestamp) ? timestamp : null;
 }
 
-
-/*
- * ============================================================
- * FIX 1: чтение счёта из нескольких форматов
- * ============================================================
- *
- * Раньше brain.js читал только home_goals / away_goals.
- * Теперь поддерживаются:
- *
- *   home_goals / away_goals
- *   homeGoals / awayGoals
- *   goals_home / goals_away
- *   score.home / score.away
- *   score.fullTime.home / score.fullTime.away
- *   result.home_goals / result.away_goals
- */
-
-function readGoalNumber(value) {
-    if (finiteNumber(value)) {
-        return value;
-    }
-
-    if (
-        typeof value === "string" &&
-        value.trim() !== ""
-    ) {
-        const parsed = Number(value);
-
-        if (Number.isFinite(parsed)) {
-            return parsed;
-        }
-    }
-
-    return null;
-}
-
-function readHomeGoals(match) {
-    const candidates = [
-        match?.home_goals,
-        match?.homeGoals,
-        match?.goals_home,
-        match?.score?.home,
-        match?.score?.fullTime?.home,
-        match?.result?.home_goals
-    ];
-
-    for (const candidate of candidates) {
-        const value = readGoalNumber(candidate);
-
-        if (value !== null) {
-            return value;
-        }
-    }
-
-    return null;
-}
-
-function readAwayGoals(match) {
-    const candidates = [
-        match?.away_goals,
-        match?.awayGoals,
-        match?.goals_away,
-        match?.score?.away,
-        match?.score?.fullTime?.away,
-        match?.result?.away_goals
-    ];
-
-    for (const candidate of candidates) {
-        const value = readGoalNumber(candidate);
-
-        if (value !== null) {
-            return value;
-        }
-    }
-
-    return null;
-}
-
-
-/*
- * ============================================================
- * FIX 2: isFinished требует числовой счёт
- * ============================================================
- *
- * Матч со статусом FINISHED, но без счёта,
- * больше НЕ считается завершённым.
- */
-
 function isFinished(match) {
-    const homeGoals = readHomeGoals(match);
-    const awayGoals = readAwayGoals(match);
-
-    if (
-        homeGoals === null ||
-        awayGoals === null
-    ) {
-        return false;
-    }
-
-    const status =
-        String(match?.status || "").toUpperCase();
+    const status = String(match?.status || "").toUpperCase();
 
     if (
         status === "FINISHED" ||
@@ -273,42 +226,11 @@ function isFinished(match) {
         return true;
     }
 
-    if (!status) {
-        return true;
-    }
-
-    return false;
+    return (
+        finiteNumber(match?.home_goals) &&
+        finiteNumber(match?.away_goals)
+    );
 }
-
-
-/*
- * ============================================================
- * FIX 3: sameTeam — нормализация имён команд
- * ============================================================
- */
-
-function sameTeam(a, b) {
-    if (a === b) {
-        return true;
-    }
-
-    if (a == null || b == null) {
-        return false;
-    }
-
-    const na = String(a)
-        .normalize("NFC")
-        .trim()
-        .toLowerCase();
-
-    const nb = String(b)
-        .normalize("NFC")
-        .trim()
-        .toLowerCase();
-
-    return na === nb;
-}
-
 
 function matchBefore(match, asOf) {
     if (!asOf) {
@@ -375,8 +297,8 @@ function getTeamMatches(results, team, asOf = null) {
         }
 
         return (
-            sameTeam(match.home, name) ||
-            sameTeam(match.away, name)
+            match.home === name ||
+            match.away === name
         );
     });
 }
@@ -402,25 +324,19 @@ function getLeagueMatches(results, competition, asOf = null) {
  */
 
 function resultForTeam(match, team) {
-    const isHome = sameTeam(match.home, team);
-
-    const homeGoals = readHomeGoals(match);
-    const awayGoals = readAwayGoals(match);
-
-    if (
-        homeGoals === null ||
-        awayGoals === null
-    ) {
-        return null;
-    }
+    const isHome = match.home === team;
 
     const gf = isHome
-        ? homeGoals
-        : awayGoals;
+        ? match.home_goals
+        : match.away_goals;
 
     const ga = isHome
-        ? awayGoals
-        : homeGoals;
+        ? match.away_goals
+        : match.home_goals;
+
+    if (!finiteNumber(gf) || !finiteNumber(ga)) {
+        return null;
+    }
 
     if (gf > ga) return "W";
     if (gf < ga) return "L";
@@ -460,15 +376,11 @@ function getForm(matches, team, count = CONFIG.formMatches) {
  */
 
 function teamGoals(match, team) {
-    const isHome = sameTeam(match.home, team);
+    const isHome = match.home === team;
 
     return {
-        gf: isHome
-            ? readHomeGoals(match)
-            : readAwayGoals(match),
-        ga: isHome
-            ? readAwayGoals(match)
-            : readHomeGoals(match)
+        gf: isHome ? match.home_goals : match.away_goals,
+        ga: isHome ? match.away_goals : match.home_goals
     };
 }
 
@@ -507,11 +419,11 @@ function getGoalStats(matches, team) {
 function getVenueStats(matches, team, venue) {
     const filtered = matches.filter(match => {
         if (venue === "home") {
-            return sameTeam(match.home, team);
+            return match.home === team;
         }
 
         if (venue === "away") {
-            return sameTeam(match.away, team);
+            return match.away === team;
         }
 
         return true;
@@ -531,15 +443,12 @@ function getLeagueAverages(matches) {
     let awayGoals = [];
 
     for (const match of matches) {
-        const hg = readHomeGoals(match);
-        const ag = readAwayGoals(match);
-
         if (
-            finiteNumber(hg) &&
-            finiteNumber(ag)
+            finiteNumber(match.home_goals) &&
+            finiteNumber(match.away_goals)
         ) {
-            homeGoals.push(hg);
-            awayGoals.push(ag);
+            homeGoals.push(match.home_goals);
+            awayGoals.push(match.away_goals);
         }
     }
 
@@ -558,6 +467,11 @@ function getLeagueAverages(matches) {
 
 /* ============================================================
  * FEG ESTIMATED xG
+ *
+ * IMPORTANT:
+ * This is an experiment.
+ *
+ * It is NOT provider xG.
  * ============================================================
  */
 
@@ -582,6 +496,13 @@ function calculateEstimatedXG(matches, team) {
             return null;
         }
 
+        /*
+         * v0.1:
+         * Without real xG provider data we use scored goals
+         * as a temporary observable proxy.
+         *
+         * This MUST NOT be confused with real xG.
+         */
         return goals.gf;
     });
 
@@ -607,11 +528,20 @@ function calculateEstimatedXG(matches, team) {
 
     const sd = standardDeviation(valid);
 
+    /*
+     * Чем меньше разброс, тем выше stability.
+     */
     const stability =
         finiteNumber(sd)
             ? 1 / (1 + sd)
             : 1;
 
+    /*
+     * Stability bonus.
+     *
+     * База всегда сохраняется.
+     * Стабильность может только немного корректировать её.
+     */
     const bonus =
         CONFIG.maxExgStabilityBonus * stability;
 
@@ -645,11 +575,11 @@ function calculateEstimatedXG(matches, team) {
  */
 
 function opponentOf(match, team) {
-    if (sameTeam(match.home, team)) {
+    if (match.home === team) {
         return match.away;
     }
 
-    if (sameTeam(match.away, team)) {
+    if (match.away === team) {
         return match.home;
     }
 
@@ -812,16 +742,6 @@ function buildEloRatings(
             continue;
         }
 
-        const homeGoals = readHomeGoals(match);
-        const awayGoals = readAwayGoals(match);
-
-        if (
-            homeGoals === null ||
-            awayGoals === null
-        ) {
-            continue;
-        }
-
         const homeRating =
             finiteNumber(ratings[home])
                 ? ratings[home]
@@ -836,8 +756,8 @@ function buildEloRatings(
             eloUpdate(
                 homeRating,
                 awayRating,
-                homeGoals,
-                awayGoals
+                match.home_goals,
+                match.away_goals
             );
 
         ratings[home] = updated.home;
@@ -1106,6 +1026,12 @@ function calculateLambdas(
         awayAD.attack *
         homeAD.defence;
 
+    /*
+     * Form influence.
+     *
+     * This is Brain v0.1.
+     * It is deliberately moderate.
+     */
     if (
         finiteNumber(homeState.form.value) &&
         finiteNumber(awayState.form.value)
@@ -1122,8 +1048,19 @@ function calculateLambdas(
         lambdaAway *= awayFormFactor;
     }
 
+    /*
+     * Home advantage.
+     */
     lambdaHome *= CONFIG.homeAdvantage;
 
+    /*
+     * Experimental eXG is NOT allowed to
+     * dominate the baseline.
+     *
+     * It is exposed as an experimental signal.
+     *
+     * We blend only when both teams have it.
+     */
     if (
         homeState.estimatedXG.available &&
         awayState.estimatedXG.available
@@ -1487,6 +1424,9 @@ class FEGBRAIN {
                 awayState
             );
 
+        /*
+         * We require minimum evidence.
+         */
         if (
             homeState.matches < CONFIG.minMatches ||
             awayState.matches < CONFIG.minMatches ||
@@ -1731,6 +1671,11 @@ class FEGBRAIN {
                     "NOT_CONNECTED"
             },
 
+            /*
+             * Это будущая точка подключения
+             * predictions.json / learning.json /
+             * laboratory.
+             */
             journal: {
                 ready:
                     true
