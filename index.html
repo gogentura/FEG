@@ -487,6 +487,60 @@
             border-top: 1px solid #26324e;
         }
 
+        .journal-score-compare {
+            display: grid;
+            gap: 7px;
+            margin-top: 9px;
+        }
+
+        .journal-score-line {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 10px;
+            padding: 9px 10px;
+            background: #121a2d;
+            border-radius: 9px;
+        }
+
+        .journal-score-label {
+            color: #8f9bb5;
+            font-size: 11px;
+        }
+
+        .journal-score-value {
+            color: #ffffff;
+            font-size: 17px;
+            font-weight: 900;
+        }
+
+        .journal-score-status {
+            margin-top: 7px;
+            padding: 8px 10px;
+            border-radius: 9px;
+            text-align: center;
+            font-size: 11px;
+            font-weight: 900;
+        }
+
+        .journal-score-hit {
+            background: #10271c;
+            color: #a7f3c1;
+            border: 1px solid #245b3b;
+        }
+
+        .journal-score-miss {
+            background: #2b151b;
+            color: #ff9ba6;
+            border: 1px solid #5c2730;
+        }
+
+        .journal-score-wait {
+            background: #1b1b2a;
+            color: #b9c2d7;
+            border: 1px solid #303653;
+        }
+
         .journal-analysis {
             display: grid;
             gap: 4px;
@@ -2672,6 +2726,14 @@ function renderJournal() {
 
                 let statusHTML = "";
 
+                const predictedScore =
+                    Array.isArray(prediction.topScores) &&
+                    prediction.topScores.length > 0
+                        ? String(
+                            prediction.topScores[0]?.score ?? ""
+                        )
+                        : "—";
+
 
                 if (
                     status ===
@@ -2682,37 +2744,85 @@ function renderJournal() {
                     const evaluation =
                         entry.evaluation;
 
-
                     const fact =
                         evaluation.fact;
-
 
                     const analysis =
                         evaluation.analysis;
 
-
                     const lambda =
                         evaluation.lambda;
 
+                    const actualScore =
+                        `${fact.homeGoals}:${fact.awayGoals}`;
+
+                    const exactScoreHit =
+                        predictedScore !== "—" &&
+                        predictedScore === actualScore;
 
                     statusHTML = `
 
                         <div class="journal-status journal-finished">
 
                             <strong>
-                                ✓ ПРОАНАЛИЗИРОВАН
+                                ✓ ПРОАНАЛИЗИРОВАНО
                             </strong>
 
 
+                            <div class="journal-score-compare">
+
+                                <div class="journal-score-line">
+
+                                    <span class="journal-score-label">
+                                        🤖 Прогноз FEG
+                                    </span>
+
+                                    <strong class="journal-score-value">
+                                        ${escapeHTML(
+                                            predictedScore
+                                        )}
+                                    </strong>
+
+                                </div>
+
+
+                                <div class="journal-score-line">
+
+                                    <span class="journal-score-label">
+                                        ⚽ Факт
+                                    </span>
+
+                                    <strong class="journal-score-value">
+                                        ${escapeHTML(
+                                            actualScore
+                                        )}
+                                    </strong>
+
+                                </div>
+
+                                <div
+                                    class="
+                                        journal-score-status
+                                        ${
+                                            exactScoreHit
+                                                ? "journal-score-hit"
+                                                : "journal-score-miss"
+                                        }
+                                "
+                                >
+
+                                    ${
+                                        exactScoreHit
+                                            ? "🎯 ТОЧНЫЙ СЧЁТ УГАДАН"
+                                            : "✗ ТОЧНЫЙ СЧЁТ НЕ УГАДАН"
+                                    }
+
+                                </div>
+
+                            </div>
+
+
                             <div class="journal-result">
-
-                                Факт:
-
-                                <strong>
-                                    ${fact.homeGoals}:${fact.awayGoals}
-                                </strong>
-
-                                <br>
 
                                 Всего голов:
 
@@ -2800,8 +2910,43 @@ function renderJournal() {
 
                             ⏳ ОЖИДАЕТ ФАКТ
 
+                            <div class="journal-score-compare">
+
+                                <div class="journal-score-line">
+
+                                    <span class="journal-score-label">
+                                        🤖 Прогноз FEG
+                                    </span>
+
+                                    <strong class="journal-score-value">
+                                        ${escapeHTML(
+                                            predictedScore
+                                        )}
+                                    </strong>
+
+                                </div>
+
+
+                                <div class="journal-score-line">
+
+                                    <span class="journal-score-label">
+                                        ⚽ Факт
+                                    </span>
+
+                                    <strong class="journal-score-value">
+                                        —
+                                    </strong>
+
+                                </div>
+
+                                <div class="journal-score-status journal-score-wait">
+                                    ⏳ ОЖИДАЕТ ЗАВЕРШЕНИЯ МАТЧА
+                                </div>
+
+                            </div>
+
                             <div
-                                style="margin-top:5px;"
+                                style="margin-top:7px;"
                             >
                                 Когда завершённый матч
                                 появится в results.json,
