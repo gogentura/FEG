@@ -1,7 +1,7 @@
 {
   "version": "FEG-MEMORY-0.2",
-  "updated_at": "2026-10-09T21:03:16.626028+00:00",
-  "match_count": 398,
+  "updated_at": "2026-10-09T22:41:35.390539+00:00",
+  "match_count": 399,
   "teams": {
     "SC Cambuur-Leeuwarden": {
       "matches": 7,
@@ -259,19 +259,19 @@
       "avg_goals_against": 2.0
     },
     "Sporting Clube de Portugal": {
-      "matches": 8,
-      "goals_for": 20,
-      "goals_against": 9,
+      "matches": 9,
+      "goals_for": 23,
+      "goals_against": 10,
       "last5": [
         "W",
         "W",
-        "W",
         "D",
-        "D"
+        "D",
+        "W"
       ],
-      "last_match": "2026-09-19T19:30:00Z",
-      "avg_goals_for": 2.5,
-      "avg_goals_against": 1.125
+      "last_match": "2026-10-09T19:15:00Z",
+      "avg_goals_for": 2.5556,
+      "avg_goals_against": 1.1111
     },
     "Sparta Rotterdam": {
       "matches": 7,
@@ -439,19 +439,19 @@
       "avg_goals_against": 1.875
     },
     "Sporting Clube de Braga": {
-      "matches": 6,
-      "goals_for": 7,
-      "goals_against": 5,
+      "matches": 7,
+      "goals_for": 8,
+      "goals_against": 8,
       "last5": [
-        "W",
         "W",
         "L",
         "W",
-        "D"
+        "D",
+        "L"
       ],
-      "last_match": "2026-09-20T17:00:00Z",
-      "avg_goals_for": 1.1667,
-      "avg_goals_against": 0.8333
+      "last_match": "2026-10-09T19:15:00Z",
+      "avg_goals_for": 1.1429,
+      "avg_goals_against": 1.1429
     },
     "Gil Vicente FC": {
       "matches": 7,
