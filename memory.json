@@ -1,7 +1,7 @@
 {
   "version": "FEG-MEMORY-0.2",
-  "updated_at": "2026-10-11T05:51:07.593628+00:00",
-  "match_count": 429,
+  "updated_at": "2026-10-11T12:54:34.018403+00:00",
+  "match_count": 431,
   "teams": {
     "SC Cambuur-Leeuwarden": {
       "matches": 7,
@@ -139,19 +139,19 @@
       "avg_goals_against": 2.125
     },
     "Willem II Tilburg": {
-      "matches": 7,
-      "goals_for": 6,
-      "goals_against": 20,
+      "matches": 8,
+      "goals_for": 7,
+      "goals_against": 23,
       "last5": [
-        "D",
         "L",
         "D",
+        "L",
         "L",
         "L"
       ],
-      "last_match": "2026-09-19T19:00:00Z",
-      "avg_goals_for": 0.8571,
-      "avg_goals_against": 2.8571
+      "last_match": "2026-10-11T10:15:00Z",
+      "avg_goals_for": 0.875,
+      "avg_goals_against": 2.875
     },
     "Vitória SC": {
       "matches": 7,
@@ -319,19 +319,19 @@
       "avg_goals_against": 1.8571
     },
     "FC Utrecht": {
-      "matches": 7,
-      "goals_for": 11,
-      "goals_against": 24,
+      "matches": 8,
+      "goals_for": 14,
+      "goals_against": 25,
       "last5": [
-        "D",
         "L",
         "D",
         "W",
-        "L"
+        "L",
+        "W"
       ],
-      "last_match": "2026-09-20T10:15:00Z",
-      "avg_goals_for": 1.5714,
-      "avg_goals_against": 3.4286
+      "last_match": "2026-10-11T10:15:00Z",
+      "avg_goals_for": 1.75,
+      "avg_goals_against": 3.125
     },
     "PEC Zwolle": {
       "matches": 7,
@@ -994,19 +994,19 @@
       "avg_goals_against": 2.2
     },
     "Como 1907": {
-      "matches": 6,
+      "matches": 7,
       "goals_for": 13,
       "goals_against": 7,
       "last5": [
         "W",
         "W",
         "W",
-        "W",
-        "L"
+        "L",
+        "D"
       ],
-      "last_match": "2026-09-20T13:00:00Z",
-      "avg_goals_for": 2.1667,
-      "avg_goals_against": 1.1667
+      "last_match": "2026-10-11T10:30:00Z",
+      "avg_goals_for": 1.8571,
+      "avg_goals_against": 1.0
     },
     "FC Internazionale Milano": {
       "matches": 7,
@@ -1654,19 +1654,19 @@
       "avg_goals_against": 1.8571
     },
     "AS Roma": {
-      "matches": 6,
+      "matches": 7,
       "goals_for": 15,
       "goals_against": 4,
       "last5": [
         "W",
-        "W",
         "D",
         "W",
+        "D",
         "D"
       ],
-      "last_match": "2026-09-19T16:00:00Z",
-      "avg_goals_for": 2.5,
-      "avg_goals_against": 0.6667
+      "last_match": "2026-10-11T10:30:00Z",
+      "avg_goals_for": 2.1429,
+      "avg_goals_against": 0.5714
     },
     "ACF Fiorentina": {
       "matches": 6,
