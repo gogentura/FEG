@@ -1,7 +1,7 @@
 {
   "version": "FEG-MEMORY-0.2",
-  "updated_at": "2026-10-11T22:00:43.786785+00:00",
-  "match_count": 453,
+  "updated_at": "2026-10-12T06:02:19.566600+00:00",
+  "match_count": 450,
   "teams": {
     "SC Cambuur-Leeuwarden": {
       "matches": 8,
@@ -154,34 +154,34 @@
       "avg_goals_against": 2.875
     },
     "Vitória SC": {
-      "matches": 8,
+      "matches": 7,
       "goals_for": 5,
-      "goals_against": 10,
+      "goals_against": 8,
       "last5": [
+        "W",
         "L",
         "D",
         "L",
-        "D",
-        "L"
+        "D"
       ],
-      "last_match": "2026-10-11T17:00:00Z",
-      "avg_goals_for": 0.625,
-      "avg_goals_against": 1.25
+      "last_match": "2026-09-20T14:30:00Z",
+      "avg_goals_for": 0.7143,
+      "avg_goals_against": 1.1429
     },
     "FC Arouca": {
-      "matches": 8,
-      "goals_for": 11,
+      "matches": 7,
+      "goals_for": 10,
       "goals_against": 7,
       "last5": [
+        "L",
         "W",
         "D",
         "L",
-        "D",
-        "W"
+        "D"
       ],
-      "last_match": "2026-10-11T19:30:00Z",
-      "avg_goals_for": 1.375,
-      "avg_goals_against": 0.875
+      "last_match": "2026-09-19T19:30:00Z",
+      "avg_goals_for": 1.4286,
+      "avg_goals_against": 1.0
     },
     "PSV": {
       "matches": 9,
@@ -244,19 +244,19 @@
       "avg_goals_against": 2.375
     },
     "CF Estrela da Amadora": {
-      "matches": 8,
+      "matches": 7,
       "goals_for": 14,
-      "goals_against": 15,
+      "goals_against": 14,
       "last5": [
+        "W",
         "D",
         "W",
         "D",
-        "L",
         "L"
       ],
-      "last_match": "2026-10-11T19:30:00Z",
-      "avg_goals_for": 1.75,
-      "avg_goals_against": 1.875
+      "last_match": "2026-09-20T14:30:00Z",
+      "avg_goals_for": 2.0,
+      "avg_goals_against": 2.0
     },
     "Sporting Clube de Portugal": {
       "matches": 9,
@@ -469,34 +469,34 @@
       "avg_goals_against": 0.7143
     },
     "Rio Ave FC": {
-      "matches": 8,
-      "goals_for": 8,
-      "goals_against": 17,
+      "matches": 7,
+      "goals_for": 5,
+      "goals_against": 15,
       "last5": [
+        "W",
         "L",
         "L",
         "D",
-        "L",
-        "W"
+        "L"
       ],
-      "last_match": "2026-10-11T14:30:00Z",
-      "avg_goals_for": 1.0,
-      "avg_goals_against": 2.125
+      "last_match": "2026-09-19T17:00:00Z",
+      "avg_goals_for": 0.7143,
+      "avg_goals_against": 2.1429
     },
     "Sport Lisboa e Benfica": {
-      "matches": 8,
-      "goals_for": 24,
+      "matches": 7,
+      "goals_for": 22,
       "goals_against": 7,
       "last5": [
         "W",
         "W",
         "W",
-        "L",
-        "W"
+        "W",
+        "L"
       ],
-      "last_match": "2026-10-11T17:00:00Z",
-      "avg_goals_for": 3.0,
-      "avg_goals_against": 0.875
+      "last_match": "2026-09-20T19:30:00Z",
+      "avg_goals_for": 3.1429,
+      "avg_goals_against": 1.0
     },
     "Académico de Viseu FC": {
       "matches": 8,
@@ -529,9 +529,9 @@
       "avg_goals_against": 0.5
     },
     "CD Nacional": {
-      "matches": 8,
-      "goals_for": 9,
-      "goals_against": 18,
+      "matches": 7,
+      "goals_for": 7,
+      "goals_against": 15,
       "last5": [
         "L",
         "L",
@@ -539,9 +539,9 @@
         "L",
         "L"
       ],
-      "last_match": "2026-10-11T14:30:00Z",
-      "avg_goals_for": 1.125,
-      "avg_goals_against": 2.25
+      "last_match": "2026-09-19T14:30:00Z",
+      "avg_goals_for": 1.0,
+      "avg_goals_against": 2.1429
     },
     "Deportivo Alavés": {
       "matches": 8,
