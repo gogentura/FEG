@@ -1,55 +1,13 @@
+
 /*
  * FEG — Football Evolution God
  * SUPER BRAIN v0.1.0
  *
- * Назначение:
- *   Первый слой "мозга" FEG.
+ * FIX: история команды содержит только матчи
+ * с подтверждённым числовым счётом.
  *
- * Принципы:
- *   1. История не изменяется.
- *   2. Будущее не используется.
- *   3. Missing != 0.
- *   4. Живая память команды отделена от формулы модели.
- *   5. FEG Estimated xG (eXG) — ЭКСПЕРИМЕНТ,
- *      а не настоящий provider xG.
- *   6. Brain не переписывает сам себя после одного матча.
- *
- * Вход:
- *   results.json
- *   memory.json (опционально)
- *
- * Основной интерфейс:
- *
- *   const brain = new FEGBRAIN(results, memory);
- *
- *   const prediction = brain.predict({
- *       home: "FC Barcelona",
- *       away: "Real Madrid",
- *       competition: "PD"
- *   });
- *
- * ------------------------------------------------------------
- * FEG eXG v0.1
- *
- * Последние 6 матчей:
- *
- *   oldest -> newest
- *
- *   match 1 = 1
- *   match 2 = 2
- *   match 3 = 3
- *   match 4 = 1
- *   match 5 = 3
- *   match 6 = 4
- *
- * Это экспериментальная модель стабильности.
- *
- * ВАЖНО:
- *   Это НЕ настоящий xG.
- *   Пока provider xG отсутствует, eXG строится из
- *   доступных результативных данных.
- *
- * ------------------------------------------------------------
+ * Формула и параметры Brain 0.1.0 сохранены.
+ * Missing != 0.
  */
 
 "use strict";
@@ -63,42 +21,25 @@ const CONFIG = Object.freeze({
     minMatches: 3,
     formMatches: 5,
     exgMatches: 6,
-
-    // Экспериментальные веса eXG:
-    // старый -> новый
     exgWeights: Object.freeze([1, 2, 3, 1, 3, 4]),
-
-    // Сглаживание атакующих/защитных параметров.
     regularization: 2,
-
-    // Ограничения lambda.
     minLambda: 0.15,
     maxLambda: 5.0,
-
-    // Poisson matrix.
     maxGoals: 9,
-
-    // Домашнее преимущество.
     homeAdvantage: 1.08,
-
-    // Elo.
     eloStart: 1500,
     eloK: 20,
     eloHomeAdvantage: 60,
-
-    // Не позволяем одному матчу резко менять оценку.
     maxExgStabilityBonus: 0.25
 });
 
-
 /* ============================================================
  * BASIC HELPERS
- * ============================================================
- */
+ * ============================================================ */
 
 function finiteNumber(value) {
     return typeof value === "number" &&
-           Number.isFinite(value);
+        Number.isFinite(value);
 }
 
 function numberOrNull(value) {
@@ -113,16 +54,12 @@ function safeDivide(a, b, fallback = null) {
     if (!finiteNumber(a) || !finiteNumber(b) || Math.abs(b) < EPS) {
         return fallback;
     }
-
     return a / b;
 }
 
 function mean(values) {
     const valid = values.filter(finiteNumber);
-
-    if (!valid.length) {
-        return null;
-    }
+    if (!valid.length) return null;
 
     return valid.reduce((sum, x) => sum + x, 0) / valid.length;
 }
@@ -143,29 +80,20 @@ function weightedMean(values, weights) {
         denominator += weight;
     }
 
-    if (denominator <= EPS) {
-        return null;
-    }
-
-    return numerator / denominator;
+    return denominator > EPS ? numerator / denominator : null;
 }
 
 function standardDeviation(values) {
     const valid = values.filter(finiteNumber);
-
-    if (valid.length < 2) {
-        return null;
-    }
+    if (valid.length < 2) return null;
 
     const avg = mean(valid);
+    if (!finiteNumber(avg)) return null;
 
-    if (!finiteNumber(avg)) {
-        return null;
-    }
-
-    const variance =
-        valid.reduce((sum, x) => sum + Math.pow(x - avg, 2), 0)
-        / valid.length;
+    const variance = valid.reduce(
+        (sum, x) => sum + Math.pow(x - avg, 2),
+        0
+    ) / valid.length;
 
     return Math.sqrt(variance);
 }
@@ -176,103 +104,90 @@ function normalizeProbabilities(values) {
     );
 
     const total = safe.reduce((sum, x) => sum + x, 0);
-
-    if (total <= EPS) {
-        return safe.map(() => 0);
-    }
+    if (total <= EPS) return safe.map(() => 0);
 
     return safe.map(x => x / total);
 }
 
 function round(value, digits = 4) {
-    if (!finiteNumber(value)) {
-        return null;
-    }
+    if (!finiteNumber(value)) return null;
 
     const factor = Math.pow(10, digits);
-
     return Math.round(value * factor) / factor;
 }
 
-
 /* ============================================================
  * DATE / MATCH HELPERS
- * ============================================================
- */
+ * ============================================================ */
 
 function matchDate(match) {
     const raw =
         match?.date ||
         match?.utcDate ||
         match?.kickoff ||
+        match?.matchDate ||
         null;
 
-    if (!raw) {
-        return null;
-    }
+    if (!raw) return null;
 
     const timestamp = Date.parse(raw);
-
     return Number.isFinite(timestamp) ? timestamp : null;
 }
 
+/*
+ * IMPORTANT FIX:
+ *
+ * Статус FINISHED сам по себе не доказывает,
+ * что в results.json уже есть готовый счёт.
+ *
+ * Раньше матч со статусом FINISHED мог попасть
+ * в историю даже с отсутствующими голами.
+ * Тогда такой матч занимал место среди последних
+ * пяти и отображался в форме знаком вопроса.
+ *
+ * Теперь принимаются только записи с двумя
+ * числовыми неотрицательными значениями голов.
+ *
+ * Отсутствующий счёт не превращаем в 0:0.
+ */
 function isFinished(match) {
-    const status = String(match?.status || "").toUpperCase();
-
-    if (
-        status === "FINISHED" ||
-        status === "AWARDED"
-    ) {
-        return true;
+    if (!match || typeof match !== "object") {
+        return false;
     }
 
+    const homeGoals = match.home_goals;
+    const awayGoals = match.away_goals;
+
     return (
-        finiteNumber(match?.home_goals) &&
-        finiteNumber(match?.away_goals)
+        finiteNumber(homeGoals) &&
+        finiteNumber(awayGoals) &&
+        homeGoals >= 0 &&
+        awayGoals >= 0
     );
 }
 
 function matchBefore(match, asOf) {
-    if (!asOf) {
-        return true;
-    }
+    if (!asOf) return true;
 
     const matchTs = matchDate(match);
-
-    if (!matchTs) {
-        return false;
-    }
+    if (matchTs === null) return false;
 
     const asOfTs =
         asOf instanceof Date
             ? asOf.getTime()
             : Date.parse(asOf);
 
-    if (!Number.isFinite(asOfTs)) {
-        return true;
-    }
+    if (!Number.isFinite(asOfTs)) return true;
 
     return matchTs < asOfTs;
 }
 
-function teamName(match, side) {
-    if (side === "home") {
-        return match?.home || null;
-    }
-
-    return match?.away || null;
-}
-
-
 /* ============================================================
  * HISTORY
- * ============================================================
- */
+ * ============================================================ */
 
 function cleanResults(results) {
-    if (!Array.isArray(results)) {
-        return [];
-    }
+    if (!Array.isArray(results)) return [];
 
     return results
         .filter(isFinished)
@@ -286,53 +201,41 @@ function cleanResults(results) {
 
 function getTeamMatches(results, team, asOf = null) {
     const name = String(team || "").trim();
-
-    if (!name) {
-        return [];
-    }
+    if (!name) return [];
 
     return results.filter(match => {
-        if (!matchBefore(match, asOf)) {
-            return false;
-        }
+        if (!matchBefore(match, asOf)) return false;
 
-        return (
-            match.home === name ||
-            match.away === name
-        );
+        return match.home === name || match.away === name;
     });
 }
 
 function getLeagueMatches(results, competition, asOf = null) {
     return results.filter(match => {
-        if (!matchBefore(match, asOf)) {
-            return false;
-        }
-
-        if (!competition) {
-            return true;
-        }
+        if (!matchBefore(match, asOf)) return false;
+        if (!competition) return true;
 
         return match.competition === competition;
     });
 }
 
-
 /* ============================================================
  * TEAM FORM
- * ============================================================
- */
+ * ============================================================ */
 
 function resultForTeam(match, team) {
-    const isHome = match.home === team;
+    let gf;
+    let ga;
 
-    const gf = isHome
-        ? match.home_goals
-        : match.away_goals;
-
-    const ga = isHome
-        ? match.away_goals
-        : match.home_goals;
+    if (match.home === team) {
+        gf = match.home_goals;
+        ga = match.away_goals;
+    } else if (match.away === team) {
+        gf = match.away_goals;
+        ga = match.home_goals;
+    } else {
+        return null;
+    }
 
     if (!finiteNumber(gf) || !finiteNumber(ga)) {
         return null;
@@ -340,7 +243,6 @@ function resultForTeam(match, team) {
 
     if (gf > ga) return "W";
     if (gf < ga) return "L";
-
     return "D";
 }
 
@@ -353,35 +255,48 @@ function formValue(result) {
 }
 
 function getForm(matches, team, count = CONFIG.formMatches) {
+    /*
+     * matches уже отсортированы по дате и очищены
+     * от записей без счёта функцией cleanResults().
+     */
     const recent = matches.slice(-count);
 
-    const values = recent
-        .map(match => formValue(resultForTeam(match, team)))
+    const sequence = recent.map(match => ({
+        date: match.date || match.utcDate || match.kickoff || null,
+        result: resultForTeam(match, team)
+    }));
+
+    const values = sequence
+        .map(item => formValue(item.result))
         .filter(finiteNumber);
 
     return {
         matches: values.length,
         value: mean(values),
-        sequence: recent.map(match => ({
-            date: match.date,
-            result: resultForTeam(match, team)
-        }))
+        sequence
     };
 }
 
-
 /* ============================================================
  * GOALS / ATTACK / DEFENCE
- * ============================================================
- */
+ * ============================================================ */
 
 function teamGoals(match, team) {
-    const isHome = match.home === team;
+    if (match.home === team) {
+        return {
+            gf: match.home_goals,
+            ga: match.away_goals
+        };
+    }
 
-    return {
-        gf: isHome ? match.home_goals : match.away_goals,
-        ga: isHome ? match.away_goals : match.home_goals
-    };
+    if (match.away === team) {
+        return {
+            gf: match.away_goals,
+            ga: match.home_goals
+        };
+    }
+
+    return { gf: null, ga: null };
 }
 
 function getGoalStats(matches, team) {
@@ -410,37 +325,27 @@ function getGoalStats(matches, team) {
     };
 }
 
-
 /* ============================================================
  * HOME / AWAY MEMORY
- * ============================================================
- */
+ * ============================================================ */
 
 function getVenueStats(matches, team, venue) {
     const filtered = matches.filter(match => {
-        if (venue === "home") {
-            return match.home === team;
-        }
-
-        if (venue === "away") {
-            return match.away === team;
-        }
-
+        if (venue === "home") return match.home === team;
+        if (venue === "away") return match.away === team;
         return true;
     });
 
     return getGoalStats(filtered, team);
 }
 
-
 /* ============================================================
  * LEAGUE AVERAGES
- * ============================================================
- */
+ * ============================================================ */
 
 function getLeagueAverages(matches) {
-    let homeGoals = [];
-    let awayGoals = [];
+    const homeGoals = [];
+    const awayGoals = [];
 
     for (const match of matches) {
         if (
@@ -457,28 +362,22 @@ function getLeagueAverages(matches) {
         homeGoals: mean(homeGoals),
         awayGoals: mean(awayGoals),
         totalGoals: mean(
-            homeGoals.map(
-                (x, i) => x + awayGoals[i]
-            )
+            homeGoals.map((x, i) => x + awayGoals[i])
         )
     };
 }
 
-
 /* ============================================================
  * FEG ESTIMATED xG
  *
- * IMPORTANT:
- * This is an experiment.
- *
- * It is NOT provider xG.
- * ============================================================
- */
+ * Экспериментальная оценка на основе голов,
+ * а не настоящий provider xG.
+ * ============================================================ */
 
 function calculateEstimatedXG(matches, team) {
     const recent = matches.slice(-CONFIG.exgMatches);
 
-    if (recent.length === 0) {
+    if (!recent.length) {
         return {
             available: false,
             version: FEG_EXG_VERSION,
@@ -491,31 +390,17 @@ function calculateEstimatedXG(matches, team) {
 
     const values = recent.map(match => {
         const goals = teamGoals(match, team);
-
-        if (!finiteNumber(goals.gf)) {
-            return null;
-        }
-
-        /*
-         * v0.1:
-         * Without real xG provider data we use scored goals
-         * as a temporary observable proxy.
-         *
-         * This MUST NOT be confused with real xG.
-         */
-        return goals.gf;
+        return finiteNumber(goals.gf) ? goals.gf : null;
     });
 
-    const weights =
-        CONFIG.exgWeights.slice(
-            CONFIG.exgWeights.length - values.length
-        );
+    const weights = CONFIG.exgWeights.slice(
+        CONFIG.exgWeights.length - values.length
+    );
 
     const base = weightedMean(values, weights);
-
     const valid = values.filter(finiteNumber);
 
-    if (!finiteNumber(base) || valid.length === 0) {
+    if (!finiteNumber(base) || !valid.length) {
         return {
             available: false,
             version: FEG_EXG_VERSION,
@@ -527,26 +412,9 @@ function calculateEstimatedXG(matches, team) {
     }
 
     const sd = standardDeviation(valid);
-
-    /*
-     * Чем меньше разброс, тем выше stability.
-     */
-    const stability =
-        finiteNumber(sd)
-            ? 1 / (1 + sd)
-            : 1;
-
-    /*
-     * Stability bonus.
-     *
-     * База всегда сохраняется.
-     * Стабильность может только немного корректировать её.
-     */
-    const bonus =
-        CONFIG.maxExgStabilityBonus * stability;
-
-    const estimatedXG =
-        base * (0.75 + bonus);
+    const stability = finiteNumber(sd) ? 1 / (1 + sd) : 1;
+    const bonus = CONFIG.maxExgStabilityBonus * stability;
+    const estimatedXG = base * (0.75 + bonus);
 
     return {
         available: true,
@@ -557,62 +425,38 @@ function calculateEstimatedXG(matches, team) {
         base: round(base),
         standardDeviation: round(sd),
         stability: round(stability),
-        estimatedXG: round(
-            Math.max(0, estimatedXG)
-        ),
+        estimatedXG: round(Math.max(0, estimatedXG)),
         experimental: true,
         note:
             "FEG Estimated xG v0.1. " +
-            "Proxy based on historical goals; " +
-            "not provider xG."
+            "Proxy based on historical goals; not provider xG."
     };
 }
 
-
 /* ============================================================
  * OPPONENT STRENGTH
- * ============================================================
- */
+ * ============================================================ */
 
 function opponentOf(match, team) {
-    if (match.home === team) {
-        return match.away;
-    }
-
-    if (match.away === team) {
-        return match.home;
-    }
-
+    if (match.home === team) return match.away;
+    if (match.away === team) return match.home;
     return null;
 }
 
-function getOpponentStrength(
-    results,
-    matches,
-    team,
-    asOf = null
-) {
+function getOpponentStrength(results, matches, team, asOf = null) {
     const opponents = [];
 
     for (const match of matches) {
         const opponent = opponentOf(match, team);
+        if (!opponent) continue;
 
-        if (!opponent) {
-            continue;
-        }
+        const opponentMatches = getTeamMatches(
+            results,
+            opponent,
+            asOf
+        );
 
-        const opponentMatches =
-            getTeamMatches(
-                results,
-                opponent,
-                asOf
-            );
-
-        const stats =
-            getGoalStats(
-                opponentMatches,
-                opponent
-            );
+        const stats = getGoalStats(opponentMatches, opponent);
 
         if (stats.matches > 0) {
             opponents.push({
@@ -642,13 +486,8 @@ function getOpponentStrength(
                 return null;
             }
 
-            return (
-                item.goalsFor +
-                (1 / Math.max(
-                    0.25,
-                    item.goalsAgainst
-                ))
-            );
+            return item.goalsFor +
+                (1 / Math.max(0.25, item.goalsAgainst));
         })
         .filter(finiteNumber);
 
@@ -660,11 +499,9 @@ function getOpponentStrength(
     };
 }
 
-
 /* ============================================================
  * ELO
- * ============================================================
- */
+ * ============================================================ */
 
 function expectedElo(homeRating, awayRating) {
     const diff =
@@ -672,40 +509,22 @@ function expectedElo(homeRating, awayRating) {
         awayRating +
         CONFIG.eloHomeAdvantage;
 
-    return 1 /
-        (1 + Math.pow(10, -diff / 400));
+    return 1 / (1 + Math.pow(10, -diff / 400));
 }
 
-function eloUpdate(
-    homeRating,
-    awayRating,
-    homeGoals,
-    awayGoals
-) {
-    const expected =
-        expectedElo(
-            homeRating,
-            awayRating
-        );
+function eloUpdate(homeRating, awayRating, homeGoals, awayGoals) {
+    const expected = expectedElo(homeRating, awayRating);
 
     let actual = 0.5;
+    if (homeGoals > awayGoals) actual = 1;
+    else if (homeGoals < awayGoals) actual = 0;
 
-    if (homeGoals > awayGoals) {
-        actual = 1;
-    } else if (homeGoals < awayGoals) {
-        actual = 0;
-    }
-
-    const goalDifference =
-        Math.abs(homeGoals - awayGoals);
-
+    const goalDifference = Math.abs(homeGoals - awayGoals);
     let multiplier = 1;
 
-    if (goalDifference === 2) {
-        multiplier = 1.5;
-    } else if (goalDifference >= 3) {
-        multiplier =
-            (11 + goalDifference) / 8;
+    if (goalDifference === 2) multiplier = 1.5;
+    else if (goalDifference >= 3) {
+        multiplier = (11 + goalDifference) / 8;
     }
 
     const delta =
@@ -720,45 +539,30 @@ function eloUpdate(
     };
 }
 
-function buildEloRatings(
-    results,
-    competition = null,
-    asOf = null
-) {
+function buildEloRatings(results, competition = null, asOf = null) {
     const ratings = {};
-
-    const matches =
-        getLeagueMatches(
-            results,
-            competition,
-            asOf
-        );
+    const matches = getLeagueMatches(results, competition, asOf);
 
     for (const match of matches) {
         const home = match.home;
         const away = match.away;
 
-        if (!home || !away) {
-            continue;
-        }
+        if (!home || !away) continue;
 
-        const homeRating =
-            finiteNumber(ratings[home])
-                ? ratings[home]
-                : CONFIG.eloStart;
+        const homeRating = finiteNumber(ratings[home])
+            ? ratings[home]
+            : CONFIG.eloStart;
 
-        const awayRating =
-            finiteNumber(ratings[away])
-                ? ratings[away]
-                : CONFIG.eloStart;
+        const awayRating = finiteNumber(ratings[away])
+            ? ratings[away]
+            : CONFIG.eloStart;
 
-        const updated =
-            eloUpdate(
-                homeRating,
-                awayRating,
-                match.home_goals,
-                match.away_goals
-            );
+        const updated = eloUpdate(
+            homeRating,
+            awayRating,
+            match.home_goals,
+            match.away_goals
+        );
 
         ratings[home] = updated.home;
         ratings[away] = updated.away;
@@ -767,117 +571,57 @@ function buildEloRatings(
     return ratings;
 }
 
-
 /* ============================================================
  * TEAM STATE
- * ============================================================
- */
+ * ============================================================ */
 
-function buildTeamState(
-    results,
-    team,
-    competition = null,
-    asOf = null
-) {
-    const allMatches =
-        getTeamMatches(
-            results,
-            team,
-            asOf
-        );
+function buildTeamState(results, team, competition = null, asOf = null) {
+    const allMatches = getTeamMatches(results, team, asOf);
 
-    const competitionMatches =
-        allMatches.filter(match => {
-            if (!competition) {
-                return true;
-            }
-
-            return match.competition === competition;
-        });
+    const competitionMatches = allMatches.filter(match => {
+        if (!competition) return true;
+        return match.competition === competition;
+    });
 
     /*
-     * IMPORTANT FEG FIX:
-     *
-     * Если в текущем соревновании уже есть минимум
-     * CONFIG.minMatches матчей, используем их.
-     *
-     * Если матчей в текущем соревновании меньше
-     * минимального порога, используем общую историю
-     * команды до даты прогноза.
-     *
-     * Это позволяет прогнозировать ЛЧ для команд,
-     * у которых пока мало матчей именно в ЛЧ,
-     * используя уже накопленную историю чемпионата
-     * и других доступных официальных матчей.
-     *
-     * Формула Brain при этом НЕ меняется.
+     * Если в турнире мало матчей, используем общую
+     * доступную историю команды до даты прогноза.
+     * Формула Brain не меняется.
      */
     const matches =
         competitionMatches.length >= CONFIG.minMatches
             ? competitionMatches
             : allMatches;
 
-    const stats =
-        getGoalStats(matches, team);
+    const stats = getGoalStats(matches, team);
+    const home = getVenueStats(matches, team, "home");
+    const away = getVenueStats(matches, team, "away");
+    const form = getForm(matches, team, CONFIG.formMatches);
+    const exg = calculateEstimatedXG(matches, team);
 
-    const home =
-        getVenueStats(
-            matches,
-            team,
-            "home"
-        );
+    const opponentStrength = getOpponentStrength(
+        results,
+        matches.slice(-6),
+        team,
+        asOf
+    );
 
-    const away =
-        getVenueStats(
-            matches,
-            team,
-            "away"
-        );
+    const eloRatings = buildEloRatings(
+        results,
+        competition,
+        asOf
+    );
 
-    const form =
-        getForm(
-            matches,
-            team,
-            CONFIG.formMatches
-        );
-
-    const exg =
-        calculateEstimatedXG(
-            matches,
-            team
-        );
-
-    const opponentStrength =
-        getOpponentStrength(
-            results,
-            matches.slice(-6),
-            team,
-            asOf
-        );
-
-    const eloRatings =
-        buildEloRatings(
-            results,
-            competition,
-            asOf
-        );
-
-    const elo =
-        finiteNumber(eloRatings[team])
-            ? eloRatings[team]
-            : CONFIG.eloStart;
+    const elo = finiteNumber(eloRatings[team])
+        ? eloRatings[team]
+        : CONFIG.eloStart;
 
     return {
         team,
         competition: competition || null,
-
         matches: matches.length,
-
-        goalsForPerMatch:
-            round(stats.goalsFor),
-
-        goalsAgainstPerMatch:
-            round(stats.goalsAgainst),
+        goalsForPerMatch: round(stats.goalsFor),
+        goalsAgainstPerMatch: round(stats.goalsAgainst),
 
         home: {
             matches: home.matches,
@@ -892,118 +636,71 @@ function buildTeamState(
         },
 
         form,
-
         estimatedXG: exg,
-
         opponentStrength,
-
         elo: round(elo, 2),
 
         evidence: {
-            minimumReached:
-                matches.length >= CONFIG.minMatches,
-
-            formAvailable:
-                form.matches > 0,
-
-            exgAvailable:
-                exg.available,
-
-            sevenMatchThreshold:
-                matches.length >= 7
+            minimumReached: matches.length >= CONFIG.minMatches,
+            formAvailable: form.matches > 0,
+            exgAvailable: exg.available,
+            sevenMatchThreshold: matches.length >= 7
         }
     };
 }
 
-
 /* ============================================================
  * ATTACK / DEFENCE
- * ============================================================
- */
+ * ============================================================ */
 
-function calculateAttackDefence(
-    teamState,
-    league
-) {
+function calculateAttackDefence(teamState, league) {
     if (
         !teamState ||
         !league ||
         !finiteNumber(league.homeGoals) ||
         !finiteNumber(league.awayGoals)
     ) {
-        return {
-            attack: null,
-            defence: null
-        };
+        return { attack: null, defence: null };
     }
 
-    const teamGoals =
-        finiteNumber(teamState.goalsForPerMatch)
-            ? teamState.goalsForPerMatch
-            : null;
+    const teamGoals = finiteNumber(teamState.goalsForPerMatch)
+        ? teamState.goalsForPerMatch
+        : null;
 
-    const teamAgainst =
-        finiteNumber(teamState.goalsAgainstPerMatch)
-            ? teamState.goalsAgainstPerMatch
-            : null;
+    const teamAgainst = finiteNumber(teamState.goalsAgainstPerMatch)
+        ? teamState.goalsAgainstPerMatch
+        : null;
 
-    const attackBase =
-        safeDivide(
-            teamGoals,
-            league.totalGoals / 2
-        );
+    const attackBase = safeDivide(
+        teamGoals,
+        league.totalGoals / 2
+    );
 
-    const defenceBase =
-        safeDivide(
-            teamAgainst,
-            league.totalGoals / 2
-        );
+    const defenceBase = safeDivide(
+        teamAgainst,
+        league.totalGoals / 2
+    );
 
     return {
-        attack:
-            finiteNumber(attackBase)
-                ? clamp(
-                    attackBase,
-                    0.25,
-                    3.0
-                )
-                : null,
+        attack: finiteNumber(attackBase)
+            ? clamp(attackBase, 0.25, 3.0)
+            : null,
 
-        defence:
-            finiteNumber(defenceBase)
-                ? clamp(
-                    defenceBase,
-                    0.25,
-                    3.0
-                )
-                : null
+        defence: finiteNumber(defenceBase)
+            ? clamp(defenceBase, 0.25, 3.0)
+            : null
     };
 }
 
-
 /* ============================================================
  * LAMBDA
- * ============================================================
- */
+ * ============================================================ */
 
-function calculateLambdas(
-    homeState,
-    awayState,
-    league
-) {
-    if (
-        !homeState ||
-        !awayState ||
-        !league
-    ) {
-        return null;
-    }
+function calculateLambdas(homeState, awayState, league) {
+    if (!homeState || !awayState || !league) return null;
 
-    const leagueHome =
-        league.homeGoals;
-
-    const leagueAway =
-        league.awayGoals;
+    const leagueHome = league.homeGoals;
+    const leagueAway = league.awayGoals;
 
     if (
         !finiteNumber(leagueHome) ||
@@ -1012,17 +709,8 @@ function calculateLambdas(
         return null;
     }
 
-    const homeAD =
-        calculateAttackDefence(
-            homeState,
-            league
-        );
-
-    const awayAD =
-        calculateAttackDefence(
-            awayState,
-            league
-        );
+    const homeAD = calculateAttackDefence(homeState, league);
+    const awayAD = calculateAttackDefence(awayState, league);
 
     if (
         !finiteNumber(homeAD.attack) ||
@@ -1043,62 +731,29 @@ function calculateLambdas(
         awayAD.attack *
         homeAD.defence;
 
-    /*
-     * Form influence.
-     *
-     * This is Brain v0.1.
-     * It is deliberately moderate.
-     */
     if (
         finiteNumber(homeState.form.value) &&
         finiteNumber(awayState.form.value)
     ) {
-        const homeFormFactor =
-            0.92 +
-            homeState.form.value * 0.16;
-
-        const awayFormFactor =
-            0.92 +
-            awayState.form.value * 0.16;
+        const homeFormFactor = 0.92 + homeState.form.value * 0.16;
+        const awayFormFactor = 0.92 + awayState.form.value * 0.16;
 
         lambdaHome *= homeFormFactor;
         lambdaAway *= awayFormFactor;
     }
 
-    /*
-     * Home advantage.
-     */
     lambdaHome *= CONFIG.homeAdvantage;
 
-    /*
-     * Experimental eXG is NOT allowed to
-     * dominate the baseline.
-     *
-     * It is exposed as an experimental signal.
-     *
-     * We blend only when both teams have it.
-     */
     if (
         homeState.estimatedXG.available &&
         awayState.estimatedXG.available
     ) {
-        const homeExg =
-            homeState.estimatedXG.estimatedXG;
+        const homeExg = homeState.estimatedXG.estimatedXG;
+        const awayExg = awayState.estimatedXG.estimatedXG;
 
-        const awayExg =
-            awayState.estimatedXG.estimatedXG;
-
-        if (
-            finiteNumber(homeExg) &&
-            finiteNumber(awayExg)
-        ) {
-            lambdaHome =
-                0.80 * lambdaHome +
-                0.20 * homeExg;
-
-            lambdaAway =
-                0.80 * lambdaAway +
-                0.20 * awayExg;
+        if (finiteNumber(homeExg) && finiteNumber(awayExg)) {
+            lambdaHome = 0.80 * lambdaHome + 0.20 * homeExg;
+            lambdaAway = 0.80 * lambdaAway + 0.20 * awayExg;
         }
     }
 
@@ -1124,20 +779,15 @@ function calculateLambdas(
     };
 }
 
-
 /* ============================================================
  * POISSON
- * ============================================================
- */
+ * ============================================================ */
 
 function factorial(n) {
     if (n < 0) return null;
 
     let result = 1;
-
-    for (let i = 2; i <= n; i++) {
-        result *= i;
-    }
+    for (let i = 2; i <= n; i++) result *= i;
 
     return result;
 }
@@ -1158,42 +808,20 @@ function poissonProbability(goals, lambda) {
     );
 }
 
-function buildScoreMatrix(
-    lambdaHome,
-    lambdaAway
-) {
+function buildScoreMatrix(lambdaHome, lambdaAway) {
     const matrix = [];
 
-    for (
-        let homeGoals = 0;
-        homeGoals <= CONFIG.maxGoals;
-        homeGoals++
-    ) {
+    for (let homeGoals = 0; homeGoals <= CONFIG.maxGoals; homeGoals++) {
         const row = [];
+        const homeProbability = poissonProbability(homeGoals, lambdaHome);
 
-        const homeProbability =
-            poissonProbability(
-                homeGoals,
-                lambdaHome
-            );
-
-        for (
-            let awayGoals = 0;
-            awayGoals <= CONFIG.maxGoals;
-            awayGoals++
-        ) {
-            const awayProbability =
-                poissonProbability(
-                    awayGoals,
-                    lambdaAway
-                );
+        for (let awayGoals = 0; awayGoals <= CONFIG.maxGoals; awayGoals++) {
+            const awayProbability = poissonProbability(awayGoals, lambdaAway);
 
             row.push({
                 homeGoals,
                 awayGoals,
-                probability:
-                    homeProbability *
-                    awayProbability
+                probability: homeProbability * awayProbability
             });
         }
 
@@ -1203,19 +831,15 @@ function buildScoreMatrix(
     return matrix;
 }
 
-
 /* ============================================================
  * OUTCOME PROBABILITIES
- * ============================================================
- */
+ * ============================================================ */
 
 function probabilitiesFromMatrix(matrix) {
     let home = 0;
     let draw = 0;
     let away = 0;
-
     let bttsYes = 0;
-
     let over25 = 0;
     let over15 = 0;
     let over35 = 0;
@@ -1226,27 +850,15 @@ function probabilitiesFromMatrix(matrix) {
         for (const item of row) {
             const p = item.probability;
 
-            if (item.homeGoals > item.awayGoals) {
-                home += p;
-            } else if (
-                item.homeGoals === item.awayGoals
-            ) {
-                draw += p;
-            } else {
-                away += p;
-            }
+            if (item.homeGoals > item.awayGoals) home += p;
+            else if (item.homeGoals === item.awayGoals) draw += p;
+            else away += p;
 
-            if (
-                item.homeGoals > 0 &&
-                item.awayGoals > 0
-            ) {
+            if (item.homeGoals > 0 && item.awayGoals > 0) {
                 bttsYes += p;
             }
 
-            const total =
-                item.homeGoals +
-                item.awayGoals;
-
+            const total = item.homeGoals + item.awayGoals;
             if (total >= 2) over15 += p;
             if (total >= 3) over25 += p;
             if (total >= 4) over35 += p;
@@ -1255,18 +867,9 @@ function probabilitiesFromMatrix(matrix) {
         }
     }
 
-    const normalized =
-        normalizeProbabilities([
-            home,
-            draw,
-            away
-        ]);
+    const normalized = normalizeProbabilities([home, draw, away]);
 
-    scores.sort(
-        (a, b) =>
-            b.probability -
-            a.probability
-    );
+    scores.sort((a, b) => b.probability - a.probability);
 
     return {
         "1": normalized[0],
@@ -1279,72 +882,44 @@ function probabilitiesFromMatrix(matrix) {
         },
 
         totals: {
-            over15: over15,
+            over15,
             under15: 1 - over15,
-
-            over25: over25,
+            over25,
             under25: 1 - over25,
-
-            over35: over35,
+            over35,
             under35: 1 - over35
         },
 
-        topScores:
-            scores
-                .slice(0, 5)
-                .map(item => ({
-                    score:
-                        `${item.homeGoals}:${item.awayGoals}`,
-                    homeGoals: item.homeGoals,
-                    awayGoals: item.awayGoals,
-                    probability:
-                        item.probability
-                }))
+        topScores: scores.slice(0, 5).map(item => ({
+            score: `${item.homeGoals}:${item.awayGoals}`,
+            homeGoals: item.homeGoals,
+            awayGoals: item.awayGoals,
+            probability: item.probability
+        }))
     };
 }
 
-
 /* ============================================================
  * DATA QUALITY
- * ============================================================
- */
+ * ============================================================ */
 
 function dataQuality(homeState, awayState) {
     const checks = {
-        homeMinimum:
-            homeState.matches >= CONFIG.minMatches,
-
-        awayMinimum:
-            awayState.matches >= CONFIG.minMatches,
-
-        homeForm:
-            homeState.form.matches > 0,
-
-        awayForm:
-            awayState.form.matches > 0,
-
-        homeExg:
-            homeState.estimatedXG.available,
-
-        awayExg:
-            awayState.estimatedXG.available,
-
-        homeSeven:
-            homeState.matches >= 7,
-
-        awaySeven:
-            awayState.matches >= 7
+        homeMinimum: homeState.matches >= CONFIG.minMatches,
+        awayMinimum: awayState.matches >= CONFIG.minMatches,
+        homeForm: homeState.form.matches > 0,
+        awayForm: awayState.form.matches > 0,
+        homeExg: homeState.estimatedXG.available,
+        awayExg: awayState.estimatedXG.available,
+        homeSeven: homeState.matches >= 7,
+        awaySeven: awayState.matches >= 7
     };
 
-    const values =
-        Object.values(checks)
-            .map(Boolean);
+    const values = Object.values(checks).map(Boolean);
 
-    const score =
-        values.length
-            ? values.filter(Boolean).length /
-              values.length
-            : 0;
+    const score = values.length
+        ? values.filter(Boolean).length / values.length
+        : 0;
 
     return {
         score: round(score, 3),
@@ -1352,30 +927,18 @@ function dataQuality(homeState, awayState) {
     };
 }
 
-
 /* ============================================================
  * BRAIN
- * ============================================================
- */
+ * ============================================================ */
 
 class FEGBRAIN {
-
     constructor(results = [], memory = null) {
-        this.version =
-            FEG_BRAIN_VERSION;
-
-        this.results =
-            cleanResults(results);
-
-        this.memory =
-            memory || null;
+        this.version = FEG_BRAIN_VERSION;
+        this.results = cleanResults(results);
+        this.memory = memory || null;
     }
 
-    getTeamState(
-        team,
-        competition = null,
-        asOf = null
-    ) {
+    getTeamState(team, competition = null, asOf = null) {
         return buildTeamState(
             this.results,
             team,
@@ -1384,66 +947,44 @@ class FEGBRAIN {
         );
     }
 
-    predict({
-        home,
-        away,
-        competition = null,
-        asOf = null
-    }) {
-
+    predict({ home, away, competition = null, asOf = null }) {
         if (!home || !away) {
             return {
                 status: "INVALID_INPUT",
-                brainVersion:
-                    this.version
+                brainVersion: this.version
             };
         }
 
         if (home === away) {
             return {
                 status: "INVALID_INPUT",
-                reason:
-                    "Home and away teams must differ.",
-                brainVersion:
-                    this.version
+                reason: "Home and away teams must differ.",
+                brainVersion: this.version
             };
         }
 
-        const leagueMatches =
-            getLeagueMatches(
-                this.results,
-                competition,
-                asOf
-            );
+        const leagueMatches = getLeagueMatches(
+            this.results,
+            competition,
+            asOf
+        );
 
-        const league =
-            getLeagueAverages(
-                leagueMatches
-            );
+        const league = getLeagueAverages(leagueMatches);
 
-        const homeState =
-            this.getTeamState(
-                home,
-                competition,
-                asOf
-            );
+        const homeState = this.getTeamState(
+            home,
+            competition,
+            asOf
+        );
 
-        const awayState =
-            this.getTeamState(
-                away,
-                competition,
-                asOf
-            );
+        const awayState = this.getTeamState(
+            away,
+            competition,
+            asOf
+        );
 
-        const quality =
-            dataQuality(
-                homeState,
-                awayState
-            );
+        const quality = dataQuality(homeState, awayState);
 
-        /*
-         * We require minimum evidence.
-         */
         if (
             homeState.matches < CONFIG.minMatches ||
             awayState.matches < CONFIG.minMatches ||
@@ -1452,173 +993,98 @@ class FEGBRAIN {
         ) {
             return {
                 status: "INSUFFICIENT_DATA",
-
-                brainVersion:
-                    this.version,
-
+                brainVersion: this.version,
                 home,
                 away,
                 competition,
-
-                asOf:
-                    asOf || null,
+                asOf: asOf || null,
 
                 evidence: {
-                    homeMatches:
-                        homeState.matches,
-
-                    awayMatches:
-                        awayState.matches,
-
-                    leagueMatches:
-                        league.matches
+                    homeMatches: homeState.matches,
+                    awayMatches: awayState.matches,
+                    leagueMatches: league.matches
                 },
 
-                dataQuality:
-                    quality,
-
+                dataQuality: quality,
                 homeState,
                 awayState
             };
         }
 
-        const lambdas =
-            calculateLambdas(
-                homeState,
-                awayState,
-                league
-            );
+        const lambdas = calculateLambdas(
+            homeState,
+            awayState,
+            league
+        );
 
         if (!lambdas) {
             return {
                 status: "INSUFFICIENT_DATA",
-
-                brainVersion:
-                    this.version,
-
+                brainVersion: this.version,
                 home,
                 away,
                 competition,
-
                 homeState,
                 awayState
             };
         }
 
-        const matrix =
-            buildScoreMatrix(
-                lambdas.lambdaHome,
-                lambdas.lambdaAway
-            );
+        const matrix = buildScoreMatrix(
+            lambdas.lambdaHome,
+            lambdas.lambdaAway
+        );
 
-        const probabilities =
-            probabilitiesFromMatrix(
-                matrix
-            );
+        const probabilities = probabilitiesFromMatrix(matrix);
 
-        const result = {
+        return {
             status: "OK",
-
             brain: "FEG SUPER BRAIN",
-
-            brainVersion:
-                this.version,
-
+            brainVersion: this.version,
             model: "FEG_BRAIN_BASELINE",
-
-            modelVersion:
-                this.version,
+            modelVersion: this.version,
 
             experimental: {
                 estimatedXG: {
                     enabled: true,
-                    version:
-                        FEG_EXG_VERSION,
-
+                    version: FEG_EXG_VERSION,
                     warning:
-                        "FEG eXG is an experimental " +
-                        "estimated signal, not provider xG."
+                        "FEG eXG is an experimental estimated signal, not provider xG."
                 }
             },
 
             home,
             away,
             competition,
+            asOf: asOf || null,
+            trainingMatches: league.matches,
 
-            asOf:
-                asOf || null,
-
-            trainingMatches:
-                league.matches,
-
-            lambdaHome:
-                round(
-                    lambdas.lambdaHome
-                ),
-
-            lambdaAway:
-                round(
-                    lambdas.lambdaAway
-                ),
+            lambdaHome: round(lambdas.lambdaHome),
+            lambdaAway: round(lambdas.lambdaAway),
 
             probabilities1X2: {
-                "1":
-                    round(probabilities["1"]),
-                "X":
-                    round(probabilities["X"]),
-                "2":
-                    round(probabilities["2"])
+                "1": round(probabilities["1"]),
+                "X": round(probabilities["X"]),
+                "2": round(probabilities["2"])
             },
 
             btts: {
-                yes:
-                    round(
-                        probabilities.btts.yes
-                    ),
-                no:
-                    round(
-                        probabilities.btts.no
-                    )
+                yes: round(probabilities.btts.yes),
+                no: round(probabilities.btts.no)
             },
 
             totals: {
-                over15:
-                    round(
-                        probabilities.totals.over15
-                    ),
-                under15:
-                    round(
-                        probabilities.totals.under15
-                    ),
-
-                over25:
-                    round(
-                        probabilities.totals.over25
-                    ),
-                under25:
-                    round(
-                        probabilities.totals.under25
-                    ),
-
-                over35:
-                    round(
-                        probabilities.totals.over35
-                    ),
-                under35:
-                    round(
-                        probabilities.totals.under35
-                    )
+                over15: round(probabilities.totals.over15),
+                under15: round(probabilities.totals.under15),
+                over25: round(probabilities.totals.over25),
+                under25: round(probabilities.totals.under25),
+                over35: round(probabilities.totals.over35),
+                under35: round(probabilities.totals.under35)
             },
 
-            topScores:
-                probabilities.topScores
-                    .map(item => ({
-                        ...item,
-                        probability:
-                            round(
-                                item.probability
-                            )
-                    })),
+            topScores: probabilities.topScores.map(item => ({
+                ...item,
+                probability: round(item.probability)
+            })),
 
             state: {
                 home: homeState,
@@ -1626,109 +1092,54 @@ class FEGBRAIN {
             },
 
             league: {
-                matches:
-                    league.matches,
-
-                homeGoals:
-                    round(
-                        league.homeGoals
-                    ),
-
-                awayGoals:
-                    round(
-                        league.awayGoals
-                    ),
-
-                totalGoals:
-                    round(
-                        league.totalGoals
-                    )
+                matches: league.matches,
+                homeGoals: round(league.homeGoals),
+                awayGoals: round(league.awayGoals),
+                totalGoals: round(league.totalGoals)
             },
 
-            dataQuality:
-                quality,
+            dataQuality: quality,
 
             brainSignals: {
-                form:
-                    true,
-
-                attack:
-                    true,
-
-                defence:
-                    true,
-
-                homeAway:
-                    true,
-
-                opponentStrength:
-                    true,
-
-                elo:
-                    true,
-
-                estimatedXG:
-                    true
+                form: true,
+                attack: true,
+                defence: true,
+                homeAway: true,
+                opponentStrength: true,
+                elo: true,
+                estimatedXG: true
             },
 
             evolution: {
-                liveMemory:
-                    "READY",
-
-                modelSelfModification:
-                    false,
-
-                challengerLaboratory:
-                    "NOT_CONNECTED",
-
-                walkForward:
-                    "NOT_CONNECTED",
-
-                promotion:
-                    "NOT_CONNECTED"
+                liveMemory: "READY",
+                modelSelfModification: false,
+                challengerLaboratory: "NOT_CONNECTED",
+                walkForward: "NOT_CONNECTED",
+                promotion: "NOT_CONNECTED"
             },
 
-            /*
-             * Это будущая точка подключения
-             * predictions.json / learning.json /
-             * laboratory.
-             */
             journal: {
-                ready:
-                    true
+                ready: true
             }
         };
-
-        return result;
     }
 }
 
-
 /* ============================================================
  * BROWSER EXPORT
- * ============================================================
- */
+ * ============================================================ */
 
 if (typeof window !== "undefined") {
     window.FEGBRAIN = FEGBRAIN;
-
-    window.FEG_BRAIN_VERSION =
-        FEG_BRAIN_VERSION;
-
-    window.FEG_EXG_VERSION =
-        FEG_EXG_VERSION;
+    window.FEG_BRAIN_VERSION = FEG_BRAIN_VERSION;
+    window.FEG_EXG_VERSION = FEG_EXG_VERSION;
 }
-
 
 /* ============================================================
  * NODE EXPORT
- * ============================================================
- */
+ * ============================================================ */
 
-if (
-    typeof module !== "undefined" &&
-    module.exports
-) {
+if (typeof module !== "undefined" && module.exports) {
     module.exports = {
         FEGBRAIN,
         FEG_BRAIN_VERSION,
