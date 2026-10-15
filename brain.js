@@ -1,4 +1,3 @@
-
 /*
  * FEG — Football Evolution God
  * SUPER BRAIN v0.1.0
@@ -539,15 +538,28 @@ function eloUpdate(homeRating, awayRating, homeGoals, awayGoals) {
     };
 }
 
+/*
+ * ============================================================
+ * FIX: Elo теперь считается по всем турнирам.
+ * ============================================================
+ *
+ * competition оставлен в аргументах для совместимости,
+ * но Elo строится по всей доступной истории матчей,
+ * чтобы форма, eXG и рейтинг учитывали и национальный
+ * чемпионат, и кубок, и Лигу чемпионов, и т.п.
+ */
 function buildEloRatings(results, competition = null, asOf = null) {
     const ratings = {};
-    const matches = getLeagueMatches(results, competition, asOf);
+
+    // Elo строится по всем турнирам.
+    const matches = getLeagueMatches(results, null, asOf);
 
     for (const match of matches) {
         const home = match.home;
         const away = match.away;
 
         if (!home || !away) continue;
+        if (!isFinished(match)) continue;
 
         const homeRating = finiteNumber(ratings[home])
             ? ratings[home]
@@ -571,28 +583,24 @@ function buildEloRatings(results, competition = null, asOf = null) {
     return ratings;
 }
 
-/* ============================================================
- * TEAM STATE
- * ============================================================ */
-
+/*
+ * ============================================================
+ * FIX: buildTeamState использует ВСЮ историю команды
+ * ============================================================
+ *
+ * Раньше, если у команды набиралось >= CONFIG.minMatches
+ * матчей в выбранном турнире, остальная история отбрасывалась.
+ * Из-за этого матчи в Лиге чемпионов или кубке не попадали
+ * в форму, средние голы, домашнюю/гостевую статистику и eXG.
+ *
+ * Теперь buildTeamState всегда работает с полной историей
+ * команды во всех турнирах.
+ */
 function buildTeamState(results, team, competition = null, asOf = null) {
-    const allMatches = getTeamMatches(results, team, asOf);
+    // ВСЯ история команды во всех турнирах.
+    const matches = getTeamMatches(results, team, asOf);
 
-    const competitionMatches = allMatches.filter(match => {
-        if (!competition) return true;
-        return match.competition === competition;
-    });
-
-    /*
-     * Если в турнире мало матчей, используем общую
-     * доступную историю команды до даты прогноза.
-     * Формула Brain не меняется.
-     */
-    const matches =
-        competitionMatches.length >= CONFIG.minMatches
-            ? competitionMatches
-            : allMatches;
-
+    // Не фильтруем историю по выбранному чемпионату.
     const stats = getGoalStats(matches, team);
     const home = getVenueStats(matches, team, "home");
     const away = getVenueStats(matches, team, "away");
@@ -606,9 +614,10 @@ function buildTeamState(results, team, competition = null, asOf = null) {
         asOf
     );
 
+    // Elo также учитывает все турниры.
     const eloRatings = buildEloRatings(
         results,
-        competition,
+        null,
         asOf
     );
 
@@ -619,7 +628,10 @@ function buildTeamState(results, team, competition = null, asOf = null) {
     return {
         team,
         competition: competition || null,
+
+        // Количество матчей в общей истории.
         matches: matches.length,
+
         goalsForPerMatch: round(stats.goalsFor),
         goalsAgainstPerMatch: round(stats.goalsAgainst),
 
