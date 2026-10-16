@@ -1169,6 +1169,7 @@
 <script src="brain.js"></script>
 <script src="rating.js"></script>
 <script src="learning_controller.js"></script>
+<script src="model_lab.js"></script>
 
 
 <script>
@@ -2069,8 +2070,7 @@ function evaluatePrediction(
 
     const lambdaAway =
         finiteNumber(
-            prediction.lambdaAway
-        );
+            prediction.lambdaAway        );
 
 
     return {
@@ -4855,6 +4855,9 @@ function recordPrediction(
 
         status:
             "OPEN",
+
+        competition:
+            competitionSelect.value || null,
 
         prediction:
             JSON.parse(
