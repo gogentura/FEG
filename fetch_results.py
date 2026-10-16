@@ -11,25 +11,37 @@ import requests
 # FEG — Football Evolution God
 # DATA COLLECTOR
 #
-# Назначение:
-#   Получение матчей football-data.org
-#   и безопасное обновление results.json.
+# FIX:
+#   Добавлена поддержка нескольких сезонов.
 #
-# Принципы:
-#   1. История не удаляется.
-#   2. Подтверждённый факт не заменяется неполными данными.
-#   3. Missing != 0.
-#   4. Будущие матчи можно обновлять.
-#   5. FINISHED/AWARDED без счёта сохраняется.
-#   6. FINISHED/AWARDED факт с голами защищён.
-#   7. Если счёт появился позже — запись обновляется на месте.
-#   8. null никогда не превращается в 0.
-#   9. results.json хранит историческую последовательность.
-#  10. Сырые данные score диагностируются до normalize.
+#   Раньше API вызывался без параметра season,
+#   поэтому возвращался только текущий сезон.
+#   Теперь для каждого турнира собираются
+#   сезоны SEASONS = [2025, 2026].
+#
+#   Всё остальное — без изменений.
 # ============================================================
 
 
 API_URL = "https://api.football-data.org/v4"
+
+# ============================================================
+# СЕЗОНЫ
+# ============================================================
+#
+# Сезон в football-data.org указывается
+# годом НАЧАЛА сезона.
+#
+# Например:
+#   2024 — сезон 2024/25
+#   2025 — сезон 2025/26
+#   2026 — сезон 2026/27
+#
+# Чтобы собрать больше истории команды,
+# добавляй сюда годы.
+
+SEASONS = [2024, 2025, 2026]
+
 
 TOKEN = os.getenv("FOOTBALL_DATA_TOKEN")
 
@@ -319,15 +331,29 @@ def diagnose_raw_match(
 # API
 # ============================================================
 
-def get_matches(competition):
+def get_matches(competition, season):
+    """
+    Получить матчи одного турнира одного сезона.
+
+    FIX:
+        Добавлен параметр season.
+        Раньше API вызывался без него,
+        поэтому возвращался только текущий сезон.
+    """
+
     url = (
         f"{API_URL}/competitions/"
         f"{competition}/matches"
     )
 
+    params = {
+        "season": season,
+    }
+
     response = requests.get(
         url,
         headers=HEADERS,
+        params=params,
         timeout=30,
     )
 
@@ -339,7 +365,8 @@ def get_matches(competition):
 
     if not isinstance(matches, list):
         raise RuntimeError(
-            f"Некорректный ответ API для {competition}"
+            f"Некорректный ответ API для {competition} "
+            f"(season={season})"
         )
 
     return matches
@@ -1047,107 +1074,124 @@ def main():
     # ========================================================
     # DOWNLOAD
     # ========================================================
+    #
+    # FIX:
+    #   Проходим по всем сезонам SEASONS
+    #   для каждого турнира.
+    #
+    #   Это заменяет старый вызов:
+    #       matches = get_matches(competition)
+    #   на двойной цикл:
+    #       for season in SEASONS:
+    #           matches = get_matches(competition, season)
 
     for competition, competition_name in (
         COMPETITIONS.items()
     ):
 
-        print()
-        print(
-            f"Получаем данные: "
-            f"{competition_name} "
-            f"({competition})"
-        )
+        for season in SEASONS:
 
-        try:
-
-            matches = get_matches(
-                competition
-            )
-
+            print()
             print(
-                f"Получено матчей: "
-                f"{len(matches)}"
+                f"Получаем данные: "
+                f"{competition_name} "
+                f"({competition}) "
+                f"season={season}"
             )
 
-            # ------------------------------------------------
-            # Не принимаем совершенно пустой ответ
-            # как нормальное обновление.
-            # ------------------------------------------------
+            try:
 
-            if not matches:
+                matches = get_matches(
+                    competition,
+                    season,
+                )
 
                 print(
-                    f"Предупреждение: "
-                    f"{competition} вернул 0 матчей."
+                    f"Получено матчей: "
+                    f"{len(matches)}"
                 )
+
+                # --------------------------------------------
+                # Не принимаем совершенно пустой ответ
+                # как нормальное обновление.
+                # --------------------------------------------
+
+                if not matches:
+
+                    print(
+                        f"Предупреждение: "
+                        f"{competition} / "
+                        f"{season} вернул 0 матчей."
+                    )
+
+                    failed_competitions += 1
+
+                    time.sleep(7)
+
+                    continue
+
+                successful_competitions += 1
+
+                # --------------------------------------------
+                # Сначала диагностируем RAW API.
+                #
+                # Это важно: после normalize мы уже не видим
+                # исходный score целиком.
+                # --------------------------------------------
+
+                for match in matches:
+
+                    if diagnose_raw_match(
+                        match,
+                        competition,
+                        competition_name,
+                    ):
+                        raw_finished_without_score += 1
+
+                # --------------------------------------------
+                # Затем normalize.
+                # --------------------------------------------
+
+                for match in matches:
+
+                    normalized = normalize_match(
+                        match,
+                        competition,
+                        competition_name,
+                    )
+
+                    if not normalized.get("id"):
+                        continue
+
+                    new_results.append(
+                        normalized
+                    )
+
+            except requests.HTTPError as exc:
 
                 failed_competitions += 1
 
-                time.sleep(7)
-
-                continue
-
-            successful_competitions += 1
-
-            # ------------------------------------------------
-            # Сначала диагностируем RAW API.
-            #
-            # Это важно: после normalize мы уже не видим
-            # исходный score целиком.
-            # ------------------------------------------------
-
-            for match in matches:
-
-                if diagnose_raw_match(
-                    match,
-                    competition,
-                    competition_name,
-                ):
-                    raw_finished_without_score += 1
-
-            # ------------------------------------------------
-            # Затем normalize.
-            # ------------------------------------------------
-
-            for match in matches:
-
-                normalized = normalize_match(
-                    match,
-                    competition,
-                    competition_name,
+                print(
+                    f"Ошибка API для "
+                    f"{competition} / "
+                    f"{season}: {exc}"
                 )
 
-                if not normalized.get("id"):
-                    continue
+            except Exception as exc:
 
-                new_results.append(
-                    normalized
+                failed_competitions += 1
+
+                print(
+                    f"Ошибка для "
+                    f"{competition} / "
+                    f"{season}: {exc}"
                 )
 
-        except requests.HTTPError as exc:
+            # ------------------------------------------------
+            # Не создаём слишком быстрый поток запросов.
+            # ------------------------------------------------
 
-            failed_competitions += 1
-
-            print(
-                f"Ошибка API для "
-                f"{competition}: {exc}"
-            )
-
-        except Exception as exc:
-
-            failed_competitions += 1
-
-            print(
-                f"Ошибка для "
-                f"{competition}: {exc}"
-            )
-
-        # ----------------------------------------------------
-        # Не создаём слишком быстрый поток запросов.
-        # ----------------------------------------------------
-
-        time.sleep(7)
+            time.sleep(7)
 
     # ========================================================
     # DOWNLOAD SUMMARY
@@ -1159,12 +1203,12 @@ def main():
     )
 
     print(
-        f"Успешных турниров: "
+        f"Успешных загрузок: "
         f"{successful_competitions}"
     )
 
     print(
-        f"Ошибок турниров: "
+        f"Ошибок загрузок: "
         f"{failed_competitions}"
     )
 
