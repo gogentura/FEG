@@ -1204,21 +1204,8 @@ const FEG_FACT_REFRESH_MS =
     5 * 60 * 1000;
 
 
-/*
- * Сколько прогнозов показываем по умолчанию
- * и на сколько раскрываем за один клик.
- */
-
 const FEG_JOURNAL_PAGE_SIZE = 10;
 
-
-/*
- * Сколько прогнозов сейчас раскрыто.
- *
- * Модульная переменная, чтобы состояние
- * сохранялось между перерисовками
- * (например, при обновлении фактов).
- */
 
 let journalVisibleCount = FEG_JOURNAL_PAGE_SIZE;
 
@@ -2070,7 +2057,8 @@ function evaluatePrediction(
 
     const lambdaAway =
         finiteNumber(
-            prediction.lambdaAway        );
+            prediction.lambdaAway
+        );
 
 
     return {
@@ -2471,15 +2459,6 @@ function renderAnalysisRow(
 }
 
 
-/*
- * ============================================================
- * JOURNAL TOGGLE
- * ============================================================
- *
- * Раскрывает ещё 10 прогнозов.
- * Если уже раскрыты все — сворачивает до 10.
- */
-
 function toggleJournalVisible() {
 
     const journal =
@@ -2495,18 +2474,10 @@ function toggleJournalVisible() {
         total
     ) {
 
-        /*
-         * Сворачиваем до 10.
-         */
-
         journalVisibleCount =
             FEG_JOURNAL_PAGE_SIZE;
 
     } else {
-
-        /*
-         * Раскрываем ещё 10.
-         */
 
         journalVisibleCount =
             Math.min(
@@ -2537,13 +2508,6 @@ function renderJournal() {
 
     if (!journal.length) {
 
-        /*
-         * Если журнал пуст — сбрасываем
-         * счётчик видимости, чтобы при
-         * появлении новых записей
-         * он начинался с 10.
-         */
-
         journalVisibleCount =
             FEG_JOURNAL_PAGE_SIZE;
 
@@ -2569,14 +2533,6 @@ function renderJournal() {
     const total =
         journal.length;
 
-
-    /*
-     * Защита: если в журнале стало меньше
-     * записей, чем сохранённый счётчик
-     * видимости (например, пользователь
-     * удалил прогнозы), аккуратно
-     * уменьшаем счётчик.
-     */
 
     if (
         journalVisibleCount >
@@ -2621,11 +2577,6 @@ function renderJournal() {
                 "FINISHED"
         ).length;
 
-
-    /*
-     * Показываем журнал с конца (свежие сверху),
-     * берём только journalVisibleCount записей.
-     */
 
     const visible =
         journal
@@ -3124,13 +3075,6 @@ function renderJournal() {
         .join("");
 
 
-    /*
-     * Кнопка раскрытия / сворачивания.
-     *
-     * Показываем, только если прогнозов
-     * больше, чем одна страница (10).
-     */
-
     if (
         total > FEG_JOURNAL_PAGE_SIZE
     ) {
@@ -3208,10 +3152,6 @@ function renderJournal() {
         html;
 
 
-    /*
-     * Кнопки удаления.
-     */
-
     container
         .querySelectorAll(
             "[data-delete-prediction]"
@@ -3234,10 +3174,6 @@ function renderJournal() {
             }
         );
 
-
-    /*
-     * Кнопка раскрытия / сворачивания.
-     */
 
     const toggleButton =
         document.getElementById(
@@ -4599,10 +4535,151 @@ function runPrediction() {
             );
 
 
+            const details = [];
+
+
+            details.push(
+                "Код модели: " +
+                (
+                    prediction.status ||
+                    "UNKNOWN"
+                )
+            );
+
+
+            if (prediction.reason) {
+
+                details.push(
+                    "Причина: " +
+                    prediction.reason
+                );
+
+            }
+
+
+            const evidence =
+                prediction.evidence || {};
+
+
+            const homeMatches =
+                evidence.homeMatches ??
+                prediction.homeState?.matches;
+
+
+            const awayMatches =
+                evidence.awayMatches ??
+                prediction.awayState?.matches;
+
+
+            if (homeMatches !== undefined) {
+
+                details.push(
+                    "Матчи хозяев: " +
+                    homeMatches
+                );
+
+            }
+
+
+            if (awayMatches !== undefined) {
+
+                details.push(
+                    "Матчи гостей: " +
+                    awayMatches
+                );
+
+            }
+
+
+            if (
+                evidence.leagueMatches !==
+                undefined
+            ) {
+
+                details.push(
+                    "Матчи выбранного турнира: " +
+                    evidence.leagueMatches
+                );
+
+            }
+
+
+            if (
+                evidence.leagueHomeGoals !==
+                undefined
+            ) {
+
+                details.push(
+                    "Средние голы хозяев турнира: " +
+                    (
+                        evidence.leagueHomeGoals ??
+                        "нет данных"
+                    )
+                );
+
+            }
+
+
+            if (
+                evidence.leagueAwayGoals !==
+                undefined
+            ) {
+
+                details.push(
+                    "Средние голы гостей турнира: " +
+                    (
+                        evidence.leagueAwayGoals ??
+                        "нет данных"
+                    )
+                );
+
+            }
+
+
+            const checks =
+                prediction
+                    .dataQuality
+                    ?.checks;
+
+
+            if (
+                checks &&
+                typeof checks === "object"
+            ) {
+
+                const failedChecks =
+                    Object.entries(checks)
+                        .filter(
+                            ([, passed]) =>
+                                !passed
+                        )
+                        .map(
+                            ([name]) =>
+                                name
+                        );
+
+
+                details.push(
+                    failedChecks.length
+                        ? "Не пройдены проверки: " +
+                          failedChecks.join(", ")
+                        : "Проверки качества данных пройдены."
+                );
+
+            }
+
+
+            console.warn(
+                "[FEG] Прогноз отклонён:",
+                prediction
+            );
+
+
             showMessage(
 
-                "Недостаточно данных для честного прогноза. " +
-                "FEG не будет придумывать отсутствующие данные.",
+                "FEG не построил прогноз. " +
+                details.join(" | ") +
+                " | Отсутствующие данные не заменялись нулями.",
 
                 "error"
 
@@ -4631,10 +4708,6 @@ function runPrediction() {
         window.lastFEGPrediction =
             prediction;
 
-
-        /*
-         * Автоскролл к прогнозу — как договорились.
-         */
 
         try {
 
