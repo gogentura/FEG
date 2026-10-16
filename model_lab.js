@@ -713,6 +713,52 @@
       `;
   }
 
+  function formatForm(form) {
+    if (form == null) return "нет данных";
+
+    if (typeof form === "string") return form;
+
+    if (Array.isArray(form)) {
+      return form.map(item => {
+        if (typeof item === "string") return item;
+
+        if (item && typeof item === "object") {
+          const result =
+            item.result ??
+            item.outcome ??
+            item.form ??
+            item.status;
+
+          if (typeof result === "string") return result;
+
+          if (result && typeof result === "object") {
+            return formatForm(result);
+          }
+
+          return "—";
+        }
+
+        return "—";
+      }).join(" · ");
+    }
+
+    if (typeof form === "object") {
+      const sequence =
+        form.sequence ??
+        form.form ??
+        form.value ??
+        form.results;
+
+      if (sequence != null && sequence !== form) {
+        return formatForm(sequence);
+      }
+
+      return "нет данных";
+    }
+
+    return String(form);
+  }
+
   function renderRecent(entries) {
     const recent = [...entries]
       .sort((a, b) =>
@@ -743,15 +789,8 @@
         .map(x => `${x[0]} ${pct(x[1])}`)
         .join(" · ") || "Вероятности не сохранены";
 
-      const hform =
-        hs.form?.sequence ||
-        hs.form?.form ||
-        hs.form?.value;
-
-      const aform =
-        as.form?.sequence ||
-        as.form?.form ||
-        as.form?.value;
+      const hform = formatForm(hs.form);
+      const aform = formatForm(as.form);
 
       const fact = e.f
         ? `Факт ${actualScore(e.f)}`
@@ -798,8 +837,8 @@
 
             <div>
               <strong>Форма:</strong>
-              хозяева ${esc(hform ?? "—")};
-              гости ${esc(aform ?? "—")}.
+              хозяева ${esc(hform)};
+              гости ${esc(aform)}.
             </div>
 
             <div>
@@ -813,10 +852,10 @@
             </div>
 
             <div>
-              <strong>Сигналы:</strong>
-              атака/защита, форма, домашний фактор, eXG и сила соперника
-              зависят от того, что именно Brain сохранил в снимке прогноза.
-              Пульт не восстанавливает отсутствующие данные задним числом.
+              <strong>Что учитывает модель:</strong>
+              результаты предыдущих матчей, атакующие и защитные показатели,
+              преимущество своего поля и расчётный xG (eXG).
+              Доступность отдельных показателей зависит от сохранённых данных.
             </div>
           </div>
         </details>
