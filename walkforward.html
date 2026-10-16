@@ -8,134 +8,72 @@
 <style>
 :root {
   color-scheme: dark;
-  --bg: #0b1020;
-  --panel: #141c30;
-  --border: #2b3853;
-  --text: #e9eef8;
-  --muted: #99a9c2;
-  --green: #4ade80;
-  --blue: #7db5ff;
-  --red: #fb7185;
+  --bg:#0b1020; --panel:#141c30; --border:#2b3853;
+  --text:#e9eef8; --muted:#99a9c2; --green:#4ade80;
+  --red:#fb7185; --blue:#7db5ff;
 }
-* { box-sizing: border-box; }
-body {
-  margin: 0;
-  padding: 18px;
-  background: var(--bg);
-  color: var(--text);
-  font-family: system-ui, -apple-system, sans-serif;
-  line-height: 1.5;
-}
-main { max-width: 1100px; margin: 0 auto; }
-h1 { font-size: 27px; margin: 0 0 5px; }
-h2 { font-size: 18px; margin: 0 0 12px; }
-p { margin: 8px 0; }
-.muted { color: var(--muted); }
-.small { font-size: 13px; }
-header { margin-bottom: 20px; }
-.panel {
-  background: var(--panel);
-  border: 1px solid var(--border);
-  border-radius: 14px;
-  padding: 16px;
-  margin-bottom: 15px;
-}
-.grid {
-  display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 10px;
-}
-.metric {
-  background: #0e1628;
-  border: 1px solid var(--border);
-  border-radius: 10px;
-  padding: 13px;
-  min-width: 0;
-}
-.metric .label { color: var(--muted); font-size: 12px; }
-.metric .value {
-  font-size: 24px;
-  font-weight: 750;
-  overflow-wrap: anywhere;
-}
-button, select {
-  background: #1c3557;
-  color: white;
-  border: 1px solid #41638f;
-  border-radius: 9px;
-  padding: 12px 15px;
-  font-size: 15px;
-}
-button { cursor: pointer; font-weight: 700; }
-button:disabled { opacity: .5; cursor: wait; }
-select { width: 100%; margin: 6px 0 12px; }
-.actions { display: flex; flex-wrap: wrap; gap: 10px; }
-.progress {
-  height: 9px;
-  background: #080d18;
-  border-radius: 8px;
-  overflow: hidden;
-  margin: 12px 0;
-}
-#progressBar {
-  width: 0;
-  height: 100%;
-  background: var(--green);
-  transition: width .12s;
-}
-.status { white-space: pre-wrap; overflow-wrap: anywhere; }
-.good { color: var(--green); }
-.warn { color: #fbbf24; }
-.bad { color: var(--red); }
-table { width: 100%; border-collapse: collapse; font-size: 13px; }
-th, td {
-  padding: 10px 8px;
-  border-bottom: 1px solid var(--border);
-  text-align: left;
-}
-th { color: var(--muted); font-weight: 600; }
-.table-wrap { overflow-x: auto; }
-ul { padding-left: 20px; }
-li { margin: 5px 0; }
-footer { color: var(--muted); font-size: 12px; padding: 12px 0 25px; }
-@media (max-width: 700px) {
-  body { padding: 11px; }
-  h1 { font-size: 23px; }
-  .grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-  .metric .value { font-size: 21px; }
-  .panel { padding: 12px; }
+*{box-sizing:border-box}
+body{margin:0;padding:16px;background:var(--bg);color:var(--text);
+font-family:system-ui,-apple-system,sans-serif;line-height:1.5}
+main{max-width:1150px;margin:auto}
+h1{font-size:26px;margin:0}
+h2{font-size:18px;margin:0 0 12px}
+p{margin:8px 0}
+.panel{background:var(--panel);border:1px solid var(--border);
+border-radius:14px;padding:16px;margin:0 0 15px}
+.muted{color:var(--muted)} .small{font-size:13px}
+.good{color:var(--green)} .bad{color:var(--red)} .warn{color:#fbbf24}
+.grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
+.metric{background:#0e1628;border:1px solid var(--border);
+border-radius:10px;padding:12px;min-width:0}
+.label{color:var(--muted);font-size:12px}
+.value{font-size:23px;font-weight:750;overflow-wrap:anywhere}
+button,select{background:#1c3557;color:white;border:1px solid #41638f;
+border-radius:9px;padding:12px;font-size:15px}
+button{font-weight:700;cursor:pointer}
+button:disabled{opacity:.5}
+select{width:100%;margin:6px 0 12px}
+.actions{display:flex;flex-wrap:wrap;gap:10px}
+.progress{height:8px;background:#080d18;border-radius:8px;overflow:hidden;margin:12px 0}
+#progressBar{height:100%;width:0;background:var(--green)}
+.status{white-space:pre-wrap;overflow-wrap:anywhere}
+.table-wrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th,td{padding:9px 7px;border-bottom:1px solid var(--border);text-align:left}
+th{color:var(--muted)}
+footer{color:var(--muted);font-size:12px;padding:12px 0 25px}
+@media(max-width:700px){
+ body{padding:10px}h1{font-size:23px}
+ .grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+ .panel{padding:12px}.value{font-size:20px}
 }
 </style>
 </head>
 <body>
 <main>
-<header>
+<header class="panel">
   <h1>FEG Walk-forward Lab</h1>
-  <div class="muted">Историческая проверка прогнозной модели</div>
-  <p class="small">
-    Изолированная лаборатория. Не изменяет brain.js, memory.json,
-    журнал прогнозов или основное приложение.
-  </p>
+  <p class="muted">Историческая проверка прогнозной модели</p>
+  <p class="small">Тестирует базовые модели A и B и настоящий FEG Brain.
+  Не изменяет основное приложение и не сохраняет результаты в журнал прогнозов.</p>
 </header>
 
 <section class="panel">
-  <h2>1. Данные</h2>
-  <p id="dataStatus" class="status muted">Ожидание загрузки results.json…</p>
+  <h2>1. Данные и запуск</h2>
+  <p id="dataStatus" class="status muted">Загрузка истории…</p>
   <div class="actions">
     <button id="loadButton">Загрузить историю</button>
-    <button id="runButton" disabled>Запустить Walk-forward</button>
+    <button id="runButton" disabled>Запустить тест</button>
   </div>
   <div class="progress"><div id="progressBar"></div></div>
-  <p id="runStatus" class="status small muted">Тест ещё не запускался.</p>
+  <p id="runStatus" class="status small muted">Ожидание.</p>
 </section>
 
 <section class="panel">
-  <h2>2. Настройки теста</h2>
+  <h2>2. Настройки</h2>
   <label for="competition">Турнир</label>
-  <select id="competition">
-    <option value="ALL">Все турниры</option>
-  </select>
-  <label for="minHistory">Минимум матчей турнира до тестируемого матча</label>
+  <select id="competition"><option value="ALL">Все турниры</option></select>
+  <label for="minHistory">Минимум матчей турнира до теста</label>
   <select id="minHistory">
     <option value="10">10 матчей</option>
     <option value="20" selected>20 матчей</option>
@@ -143,727 +81,474 @@ footer { color: var(--muted); font-size: 12px; padding: 12px 0 25px; }
     <option value="100">100 матчей</option>
   </select>
   <p class="small muted">
-    Матчи одной календарной даты проверяются до добавления результатов
-    этой даты в историю. Поэтому результаты матчей того же дня
-    не раскрываются модели заранее.
+    Прогноз строится до добавления фактов текущего дня.
+    FEG Brain также требует минимум 5 исторических матчей для каждой команды.
   </p>
 </section>
 
 <section class="panel">
-  <h2>3. Результат тестирования</h2>
+  <h2>3. Результат FEG Brain</h2>
   <div class="grid">
-    <div class="metric">
-      <div class="label">Проверено матчей</div>
-      <div class="value" id="mTested">—</div>
-    </div>
-    <div class="metric">
-      <div class="label">Точность исхода</div>
-      <div class="value" id="mAccuracy">—</div>
-    </div>
-    <div class="metric">
-      <div class="label">Brier Score ↓</div>
-      <div class="value" id="mBrier">—</div>
-    </div>
-    <div class="metric">
-      <div class="label">Log Loss ↓</div>
-      <div class="value" id="mLogLoss">—</div>
-    </div>
-    <div class="metric">
-      <div class="label">Ошибка голов хозяев</div>
-      <div class="value" id="mHomeMae">—</div>
-    </div>
-    <div class="metric">
-      <div class="label">Ошибка голов гостей</div>
-      <div class="value" id="mAwayMae">—</div>
-    </div>
-    <div class="metric">
-      <div class="label">Угадан точный счёт</div>
-      <div class="value" id="mExact">—</div>
-    </div>
-    <div class="metric">
-      <div class="label">Обе забили (BTTS)</div>
-      <div class="value" id="mBtts">—</div>
-    </div>
+    <div class="metric"><div class="label">Проверено Brain</div><div id="mTested" class="value">—</div></div>
+    <div class="metric"><div class="label">Точность исхода</div><div id="mAccuracy" class="value">—</div></div>
+    <div class="metric"><div class="label">Brier ↓</div><div id="mBrier" class="value">—</div></div>
+    <div class="metric"><div class="label">Log Loss ↓</div><div id="mLogLoss" class="value">—</div></div>
+    <div class="metric"><div class="label">MAE голов хозяев</div><div id="mHomeMae" class="value">—</div></div>
+    <div class="metric"><div class="label">MAE голов гостей</div><div id="mAwayMae" class="value">—</div></div>
+    <div class="metric"><div class="label">Точный счёт</div><div id="mExact" class="value">—</div></div>
+    <div class="metric"><div class="label">Brain без прогноза</div><div id="mSkipped" class="value">—</div></div>
   </div>
-  <p class="small muted">
-    Меньше — лучше для Brier Score, Log Loss и ошибок голов.
-    Точность исхода и точного счёта сами по себе не доказывают
-    качество вероятностного прогноза.
-  </p>
+  <p class="small muted">MAE — средняя абсолютная ошибка числа голов.
+  Низкие Brier, Log Loss и MAE лучше. Точность исхода не показывает качество вероятностей полностью.</p>
 </section>
 
 <section class="panel">
   <h2>4. Сравнение моделей</h2>
+  <div class="table-wrap">
+    <table>
+      <thead><tr>
+        <th>Модель</th><th>Матчей</th><th>Исход</th>
+        <th>Brier ↓</th><th>Log Loss ↓</th><th>MAE голов ↓</th>
+      </tr></thead>
+      <tbody id="comparison"><tr><td colspan="6">Запусти тест.</td></tr></tbody>
+    </table>
+  </div>
   <p class="small muted">
-    Модель A использует исторические показатели команд с поправкой
-    на средний уровень голов. Модель B использует средние голы
-    турнира до даты матча. Это базовые лабораторные модели,
-    не действующий FEG Brain.
+    A — история команд и средние голы. B — средние голы турнира.
+    FEG Brain — формула из подключённого brain.js.
+    Модели сравниваются только на матчах, для которых есть прогноз Brain.
   </p>
+</section>
+
+<section class="panel">
+  <h2>5. Примеры прогнозов Brain</h2>
   <div class="table-wrap">
     <table>
-      <thead>
-        <tr>
-          <th>Модель</th>
-          <th>Матчей</th>
-          <th>Исход</th>
-          <th>Brier ↓</th>
-          <th>Log Loss ↓</th>
-          <th>MAE голов ↓</th>
-        </tr>
-      </thead>
-      <tbody id="comparison">
-        <tr><td colspan="6">Сначала запусти тест.</td></tr>
-      </tbody>
+      <thead><tr><th>Дата</th><th>Турнир</th><th>Матч</th>
+      <th>Прогноз</th><th>Факт</th><th>Исход</th></tr></thead>
+      <tbody id="examples"><tr><td colspan="6">Пока нет результатов.</td></tr></tbody>
     </table>
   </div>
 </section>
 
 <section class="panel">
-  <h2>5. Примеры проверенных прогнозов</h2>
-  <div class="table-wrap">
-    <table>
-      <thead>
-        <tr>
-          <th>Дата</th>
-          <th>Турнир</th>
-          <th>Матч</th>
-          <th>Прогноз</th>
-          <th>Факт</th>
-          <th>Исход</th>
-        </tr>
-      </thead>
-      <tbody id="examples">
-        <tr><td colspan="6">Пока нет результатов.</td></tr>
-      </tbody>
-    </table>
-  </div>
+  <h2>6. Диагностика</h2>
+  <p id="diagnostics" class="status small muted">Ожидание теста.</p>
+  <p class="small muted">
+    Brain не меняет свою формулу и не обучается на результатах теста.
+    Эта лаборатория только оценивает прогнозы. Автоматического переключения моделей нет.
+  </p>
 </section>
 
-<section class="panel">
-  <h2>6. Ограничения и диагностика</h2>
-  <ul class="small">
-    <li>Используются только записи со статусом FINISHED или AWARDED
-      и числовым полным счётом.</li>
-    <li>Будущие матчи и записи без счёта не становятся фактами.</li>
-    <li>При одинаковой дате матчи не используют результаты друг друга.</li>
-    <li>Результаты зависят от полноты истории и корректности дат.</li>
-    <li>Этот тест не воспроизводит автоматически формулы brain.js,
-      Elo, eXG или настройки основного приложения.</li>
-  </ul>
-  <p id="diagnostics" class="status small muted">Диагностика появится после запуска.</p>
-</section>
-
-<footer>
-  FEG — Не усложнять. Не верить на слово. Проверять.
-</footer>
+<footer>FEG — Не усложнять. Не верить на слово. Проверять.</footer>
 </main>
 
+<!-- Подключаем настоящий файл Brain из того же репозитория -->
+<script src="./brain.js"></script>
 <script>
 "use strict";
 
 const $ = id => document.getElementById(id);
-
 let rawMatches = [];
-let normalizedMatches = [];
-let lastRun = null;
+let matches = [];
 
-function isNumber(x) {
-  return typeof x === "number" && Number.isFinite(x);
-}
-
-function parseDate(x) {
+const isNum = x => typeof x === "number" && Number.isFinite(x);
+const dateMs = x => {
   if (!x || typeof x !== "string") return null;
-  const ms = Date.parse(x);
-  return Number.isFinite(ms) ? ms : null;
-}
+  const n = Date.parse(x);
+  return Number.isFinite(n) ? n : null;
+};
+const dayOf = x => {
+  const n = dateMs(x);
+  return n === null ? null : new Date(n).toISOString().slice(0,10);
+};
 
-function dayKey(date) {
-  const ms = parseDate(date);
-  return ms === null ? null : new Date(ms).toISOString().slice(0, 10);
-}
+function normalize(data) {
+  if (!Array.isArray(data)) throw Error("results.json должен быть массивом.");
 
-function validFact(m) {
-  const status = String(m.status || "").toUpperCase();
-  return (status === "FINISHED" || status === "AWARDED")
-    && isNumber(m.home_goals)
-    && isNumber(m.away_goals)
-    && m.home_goals >= 0
-    && m.away_goals >= 0
-    && m.home
-    && m.away
-    && dayKey(m.date);
-}
-
-function normalizeData(data) {
-  if (!Array.isArray(data)) {
-    throw new Error("Ожидался JSON-массив матчей.");
-  }
-
-  const seen = new Set();
-  const out = [];
-  let badDate = 0;
-  let noScore = 0;
-  let notFinished = 0;
-  let duplicate = 0;
+  const seen = new Set(), out = [];
+  let rejected = 0, duplicates = 0;
 
   for (const m of data) {
     if (!m || typeof m !== "object") continue;
-
     const key = String(m.id || [
-      m.date, m.competition, m.home, m.away,
-      m.home_goals, m.away_goals
+      m.date,m.competition,m.home,m.away,m.home_goals,m.away_goals
     ].join("|"));
 
-    if (seen.has(key)) {
-      duplicate++;
-      continue;
-    }
+    if (seen.has(key)) { duplicates++; continue; }
     seen.add(key);
 
-    if (!dayKey(m.date)) {
-      badDate++;
-      continue;
-    }
-
     const status = String(m.status || "").toUpperCase();
-    if (status !== "FINISHED" && status !== "AWARDED") {
-      notFinished++;
+    if (!["FINISHED","AWARDED"].includes(status) ||
+        !isNum(m.home_goals) || !isNum(m.away_goals) ||
+        m.home_goals < 0 || m.away_goals < 0 ||
+        !m.home || !m.away || !dayOf(m.date)) {
+      rejected++;
       continue;
     }
-
-    if (!isNumber(m.home_goals) || !isNumber(m.away_goals)
-        || m.home_goals < 0 || m.away_goals < 0) {
-      noScore++;
-      continue;
-    }
-
-    if (!m.home || !m.away) continue;
 
     out.push({
-      id: key,
-      date: m.date,
-      day: dayKey(m.date),
-      competition: String(m.competition || "UNKNOWN"),
-      competitionName: String(m.competition_name || m.competition || "UNKNOWN"),
-      home: String(m.home),
-      away: String(m.away),
-      hg: m.home_goals,
-      ag: m.away_goals
+      id:key, date:m.date, day:dayOf(m.date),
+      competition:String(m.competition || "UNKNOWN"),
+      competitionName:String(m.competition_name || m.competition || "UNKNOWN"),
+      home:String(m.home), away:String(m.away),
+      hg:m.home_goals, ag:m.away_goals,
+      status:"FINISHED"
     });
   }
 
-  out.sort((a, b) =>
-    a.day.localeCompare(b.day) || a.id.localeCompare(b.id)
-  );
-
-  return {out, badDate, noScore, notFinished, duplicate};
+  out.sort((a,b) => a.day.localeCompare(b.day) || a.id.localeCompare(b.id));
+  return {out,rejected,duplicates};
 }
 
 async function loadHistory() {
   $("loadButton").disabled = true;
   $("runButton").disabled = true;
-  $("dataStatus").textContent = "Загружаю ./results.json …";
   $("dataStatus").className = "status muted";
+  $("dataStatus").textContent = "Загружаю results.json и проверяю brain.js…";
 
   try {
-    const response = await fetch("./results.json?lab=" + Date.now(), {
-      cache: "no-store"
+    if (typeof window.FEGBRAIN !== "function") {
+      throw Error("FEGBRAIN не найден. Проверь, что brain.js опубликован рядом с walkforward.html.");
+    }
+
+    const response = await fetch("./results.json?lab=" + Date.now(), {cache:"no-store"});
+    if (!response.ok) throw Error("Не удалось загрузить results.json: HTTP " + response.status);
+
+    rawMatches = await response.json();
+    const result = normalize(rawMatches);
+    matches = result.out;
+
+    if (!matches.length) throw Error("Нет подтверждённых матчей с полным счётом.");
+
+    const select = $("competition");
+    const old = select.value;
+    select.innerHTML = '<option value="ALL">Все турниры</option>';
+
+    [...new Set(matches.map(m => m.competition))].sort().forEach(c => {
+      const opt = document.createElement("option");
+      opt.value = c;
+      opt.textContent = c;
+      select.appendChild(opt);
     });
-    if (!response.ok) {
-      throw new Error("HTTP " + response.status +
-        ". Проверь, что results.json опубликован рядом с walkforward.html.");
-    }
-
-    const data = await response.json();
-    const result = normalizeData(data);
-    rawMatches = data;
-    normalizedMatches = result.out;
-
-    if (!normalizedMatches.length) {
-      throw new Error("Не найдено ни одного подтверждённого матча с полным счётом.");
-    }
-
-    fillCompetitions();
-
-    $("dataStatus").textContent =
-      "Загрузка успешна.\n" +
-      "Всего записей JSON: " + rawMatches.length + "\n" +
-      "Матчей с подтверждённым счётом: " + normalizedMatches.length + "\n" +
-      "Без счёта/нечисловой счёт: " + result.noScore + "\n" +
-      "Не завершены или другой статус: " + result.notFinished + "\n" +
-      "Некорректная дата: " + result.badDate + "\n" +
-      "Дубликаты по ID: " + result.duplicate + "\n" +
-      "Диапазон дат: " + normalizedMatches[0].day +
-      " — " + normalizedMatches[normalizedMatches.length - 1].day;
+    if ([...select.options].some(o => o.value === old)) select.value = old;
 
     $("dataStatus").className = "status good";
-    $("runButton").disabled = false;
-    $("runStatus").textContent = "История загружена. Можно запускать тест.";
-  } catch (e) {
     $("dataStatus").textContent =
-      "Не удалось загрузить данные: " + e.message +
-      "\nЕсли открыл файл локально с телефона, запусти его через GitHub Pages.";
+      "Данные загружены.\n" +
+      "Версия Brain: " + (window.FEG_BRAIN_VERSION || "не указана") + "\n" +
+      "Записей JSON: " + rawMatches.length + "\n" +
+      "Матчей с подтверждённым счётом: " + matches.length + "\n" +
+      "Исключено записей: " + result.rejected + "\n" +
+      "Дубликатов: " + result.duplicates + "\n" +
+      "Период: " + matches[0].day + " — " + matches[matches.length-1].day;
+
+    $("runButton").disabled = false;
+    $("runStatus").textContent = "Готово к запуску.";
+  } catch (e) {
     $("dataStatus").className = "status bad";
+    $("dataStatus").textContent = "Ошибка: " + e.message;
   } finally {
     $("loadButton").disabled = false;
   }
 }
 
-function fillCompetitions() {
-  const select = $("competition");
-  const old = select.value;
-  const comps = [...new Set(normalizedMatches.map(m => m.competition))].sort();
-  select.innerHTML = '<option value="ALL">Все турниры</option>';
-  for (const c of comps) {
-    const option = document.createElement("option");
-    option.value = c;
-    option.textContent = c;
-    select.appendChild(option);
-  }
-  if (comps.includes(old)) select.value = old;
+function metric() {
+  return {n:0,correct:0,brier:0,logloss:0,homeMae:0,awayMae:0,exact:0};
 }
 
-function newStats() {
-  return {n: 0, gf: 0, ga: 0, homeN: 0, homeGF: 0,
-    homeGA: 0, awayN: 0, awayGF: 0, awayGA: 0};
-}
-
-function addTeamStats(stats, m, isHome) {
-  stats.n++;
-  if (isHome) {
-    stats.gf += m.hg;
-    stats.ga += m.ag;
-    stats.homeN++;
-    stats.homeGF += m.hg;
-    stats.homeGA += m.ag;
-  } else {
-    stats.gf += m.ag;
-    stats.ga += m.hg;
-    stats.awayN++;
-    stats.awayGF += m.ag;
-    stats.awayGA += m.hg;
-  }
-}
-
-function addMatchToHistory(m, compStats, globalStats, teamComp, teamAll) {
-  const c = m.competition;
-  if (!compStats.has(c)) compStats.set(c, newStats());
-  const cs = compStats.get(c);
-  cs.n++;
-  cs.gf += m.hg + m.ag;
-  cs.ga += m.hg + m.ag;
-  cs.homeN++;
-  cs.homeGF += m.hg;
-  cs.homeGA += m.ag;
-  cs.awayN++;
-  cs.awayGF += m.ag;
-  cs.awayGA += m.hg;
-
-  globalStats.n++;
-  globalStats.gf += m.hg + m.ag;
-  globalStats.ga += m.hg + m.ag;
-  globalStats.homeN++;
-  globalStats.homeGF += m.hg;
-  globalStats.homeGA += m.ag;
-  globalStats.awayN++;
-  globalStats.awayGF += m.ag;
-  globalStats.awayGA += m.hg;
-
-  const homeCompKey = c + "\u0000" + m.home;
-  const awayCompKey = c + "\u0000" + m.away;
-
-  if (!teamComp.has(homeCompKey)) teamComp.set(homeCompKey, newStats());
-  if (!teamComp.has(awayCompKey)) teamComp.set(awayCompKey, newStats());
-  if (!teamAll.has(m.home)) teamAll.set(m.home, newStats());
-  if (!teamAll.has(m.away)) teamAll.set(m.away, newStats());
-
-  addTeamStats(teamComp.get(homeCompKey), m, true);
-  addTeamStats(teamComp.get(awayCompKey), m, false);
-  addTeamStats(teamAll.get(m.home), m, true);
-  addTeamStats(teamAll.get(m.away), m, false);
-}
-
-function safeAvg(total, n, fallback) {
-  return n > 0 ? total / n : fallback;
-}
-
-function teamAverages(teamComp, teamAll, competition, team, globalAvg, compAvg) {
-  const cs = teamComp.get(competition + "\u0000" + team);
-  const all = teamAll.get(team);
-
-  // Используем турнирные показатели, если накоплено хотя бы 3 матча.
-  // Иначе берём общую историю команды, если она доступна.
-  let s = cs && cs.n >= 3 ? cs : all;
-
-  if (!s || !s.n) {
-    return {gf: globalAvg, ga: globalAvg, n: 0};
-  }
-
-  const gf = s.gf / s.n;
-  const ga = s.ga / s.n;
-
-  // Регуляризация: при малой выборке приближаем показатели к среднему.
-  const weight = s.n / (s.n + 5);
-  return {
-    gf: weight * gf + (1 - weight) * compAvg,
-    ga: weight * ga + (1 - weight) * compAvg,
-    n: s.n
-  };
-}
-
-function poissonPmf(k, lambda) {
-  if (k === 0) return Math.exp(-lambda);
-  let p = Math.exp(-lambda);
-  for (let i = 1; i <= k; i++) p *= lambda / i;
-  return p;
-}
-
-function scoreDistribution(lambdaHome, lambdaAway) {
-  const max = 10;
-  const hp = [], ap = [];
-  for (let i = 0; i <= max; i++) {
-    hp.push(poissonPmf(i, lambdaHome));
-    ap.push(poissonPmf(i, lambdaAway));
-  }
-
-  const cells = [];
-  let total = 0;
-  let home = 0, draw = 0, away = 0;
-  let best = {h: 0, a: 0, p: -1};
-
-  for (let h = 0; h <= max; h++) {
-    for (let a = 0; a <= max; a++) {
-      const p = hp[h] * ap[a];
-      cells.push({h, a, p});
-      total += p;
-      if (h > a) home += p;
-      else if (h === a) draw += p;
-      else away += p;
-      if (p > best.p) best = {h, a, p};
-    }
-  }
-
-  if (!total) return null;
-
-  // Нормализация компенсирует малую вероятность хвоста > 10 голов.
-  return {
-    probs: [home / total, draw / total, away / total],
-    score: best.h + ":" + best.a,
-    lambdaHome,
-    lambdaAway
-  };
-}
-
-function makeForecastA(m, compStats, globalStats, teamComp, teamAll) {
-  const cs = compStats.get(m.competition);
-  const gs = globalStats;
-
-  const globalAvg = gs.n
-    ? (gs.homeGF + gs.awayGF) / (2 * gs.n)
-    : 1.25;
-
-  const compAvg = cs && cs.n
-    ? (cs.homeGF + cs.awayGF) / (2 * cs.n)
-    : globalAvg;
-
-  const homeMean = cs && cs.n >= 10
-    ? cs.homeGF / cs.n
-    : safeAvg(gs.homeGF, gs.n, 1.45);
-
-  const awayMean = cs && cs.n >= 10
-    ? cs.awayGF / cs.n
-    : safeAvg(gs.awayGF, gs.n, 1.15);
-
-  const h = teamAverages(teamComp, teamAll, m.competition, m.home, globalAvg, compAvg);
-  const a = teamAverages(teamComp, teamAll, m.competition, m.away, globalAvg, compAvg);
-
-  let lh = homeMean * (h.gf / Math.max(0.25, compAvg))
-    * (a.ga / Math.max(0.25, compAvg));
-  let la = awayMean * (a.gf / Math.max(0.25, compAvg))
-    * (h.ga / Math.max(0.25, compAvg));
-
-  // Защита от неустойчивых значений на малых выборках.
-  lh = Math.max(0.15, Math.min(4.5, lh));
-  la = Math.max(0.15, Math.min(4.5, la));
-
-  return scoreDistribution(lh, la);
-}
-
-function makeForecastB(m, compStats, globalStats) {
-  const cs = compStats.get(m.competition);
-  const gs = globalStats;
-
-  let lh, la;
-  if (cs && cs.n >= 1) {
-    lh = cs.homeGF / cs.n;
-    la = cs.awayGF / cs.n;
-  } else if (gs.n) {
-    lh = gs.homeGF / gs.n;
-    la = gs.awayGF / gs.n;
-  } else {
-    lh = 1.45;
-    la = 1.15;
-  }
-
-  return scoreDistribution(
-    Math.max(0.15, Math.min(4.5, lh)),
-    Math.max(0.15, Math.min(4.5, la))
-  );
-}
-
-function outcomeIndex(h, a) {
-  if (h > a) return 0;
-  if (h === a) return 1;
-  return 2;
-}
-
-function predictedOutcome(probs) {
+function outcome(h,a) { return h>a ? 0 : h===a ? 1 : 2; }
+function pick(probs) {
   let best = 0;
-  for (let i = 1; i < probs.length; i++) {
-    if (probs[i] > probs[best]) best = i;
-  }
+  for (let i=1;i<probs.length;i++) if (probs[i]>probs[best]) best=i;
   return best;
 }
-
-function createMetric() {
-  return {
-    n: 0, correct: 0, brier: 0, logloss: 0,
-    homeMae: 0, awayMae: 0, exact: 0,
-    bttsCorrect: 0, bttsN: 0
-  };
-}
-
-function updateMetric(metric, forecast, m) {
-  if (!forecast) return;
-  const actual = outcomeIndex(m.hg, m.ag);
-  const pred = predictedOutcome(forecast.probs);
-  metric.n++;
-  if (pred === actual) metric.correct++;
-
-  for (let i = 0; i < 3; i++) {
-    const target = i === actual ? 1 : 0;
-    metric.brier += (forecast.probs[i] - target) ** 2;
-  }
-
-  metric.logloss += -Math.log(Math.max(1e-15, forecast.probs[actual]));
-  metric.homeMae += Math.abs(forecast.lambdaHome - m.hg);
-  metric.awayMae += Math.abs(forecast.lambdaAway - m.ag);
-
-  const predictedScore = forecast.score.split(":").map(Number);
-  if (predictedScore[0] === m.hg && predictedScore[1] === m.ag) {
-    metric.exact++;
-  }
-
-  const actualBtts = m.hg > 0 && m.ag > 0;
-  const predictedBtts = forecast.probs
-    ? null : null;
-
-  // Оценка BTTS по наиболее вероятному точному счёту — описательная метрика.
-  const predBtts = predictedScore[0] > 0 && predictedScore[1] > 0;
-  if (predBtts === actualBtts) metric.bttsCorrect++;
-  metric.bttsN++;
-}
-
-function average(value, n, digits = 3) {
-  return n ? (value / n).toFixed(digits) : "—";
-}
-
-function pct(value, n) {
-  return n ? (100 * value / n).toFixed(1) + "%" : "—";
-}
-
-function renderMetric(prefix, metric) {
-  $(prefix + "Tested").textContent = metric.n.toLocaleString("ru-RU");
-  $(prefix + "Accuracy").textContent = pct(metric.correct, metric.n);
-  $(prefix + "Brier").textContent = average(metric.brier, metric.n);
-  $(prefix + "LogLoss").textContent = average(metric.logloss, metric.n);
-  $(prefix + "HomeMae").textContent = average(metric.homeMae, metric.n);
-  $(prefix + "AwayMae").textContent = average(metric.awayMae, metric.n);
-  $(prefix + "Exact").textContent = pct(metric.exact, metric.n);
-  $(prefix + "Btts").textContent = pct(metric.bttsCorrect, metric.bttsN);
-}
-
-function renderMainMetric(metric) {
-  $("mTested").textContent = metric.n.toLocaleString("ru-RU");
-  $("mAccuracy").textContent = pct(metric.correct, metric.n);
-  $("mBrier").textContent = average(metric.brier, metric.n);
-  $("mLogLoss").textContent = average(metric.logloss, metric.n);
-  $("mHomeMae").textContent = average(metric.homeMae, metric.n);
-  $("mAwayMae").textContent = average(metric.awayMae, metric.n);
-  $("mExact").textContent = pct(metric.exact, metric.n);
-  $("mBtts").textContent = pct(metric.bttsCorrect, metric.bttsN);
-}
-
+function pct(a,n) { return n ? (100*a/n).toFixed(1)+"%" : "—"; }
+function avg(a,n) { return n ? (a/n).toFixed(3) : "—"; }
 function esc(x) {
-  return String(x).replace(/[&<>"']/g, c => ({
-    "&": "&amp;", "<": "&lt;", ">": "&gt;",
-    '"': "&quot;", "'": "&#39;"
+  return String(x).replace(/[&<>"']/g,c=>({
+    "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"
   })[c]);
 }
 
-function renderComparison(a, b) {
-  const rows = [
-    ["A — Команды + голы", a],
-    ["B — Среднее турнира", b]
-  ];
-  $("comparison").innerHTML = rows.map(([name, m]) => `
-    <tr>
-      <td>${esc(name)}</td>
-      <td>${m.n.toLocaleString("ru-RU")}</td>
-      <td>${pct(m.correct, m.n)}</td>
-      <td>${average(m.brier, m.n)}</td>
-      <td>${average(m.logloss, m.n)}</td>
-      <td>${average(m.homeMae + m.awayMae, 2 * m.n)}</td>
-    </tr>
-  `).join("");
+function updateMetric(s, f, m) {
+  if (!f || !Array.isArray(f.probs) || f.probs.length !== 3) return;
+  const actual = outcome(m.hg,m.ag);
+  s.n++;
+  if (pick(f.probs) === actual) s.correct++;
+
+  for (let i=0;i<3;i++) {
+    const target = i===actual ? 1 : 0;
+    s.brier += (f.probs[i]-target)**2;
+  }
+  s.logloss += -Math.log(Math.max(1e-15,f.probs[actual]));
+  s.homeMae += Math.abs(f.lambdaHome-m.hg);
+  s.awayMae += Math.abs(f.lambdaAway-m.ag);
+
+  const score = String(f.score).split(":").map(Number);
+  if (score[0]===m.hg && score[1]===m.ag) s.exact++;
 }
 
-function renderExamples(examples) {
-  const rows = examples.slice(-40).reverse();
-  if (!rows.length) {
-    $("examples").innerHTML = "<tr><td colspan='6'>Нет проверенных прогнозов.</td></tr>";
-    return;
+function poisson(k,l) {
+  let p=Math.exp(-l);
+  for(let i=1;i<=k;i++) p*=l/i;
+  return p;
+}
+
+function forecastFromLambdas(lh,la) {
+  if (!isNum(lh)||!isNum(la)) return null;
+  lh=Math.max(.15,Math.min(5,lh));
+  la=Math.max(.15,Math.min(5,la));
+
+  const pH=[],pA=[];
+  for(let i=0;i<=12;i++){pH.push(poisson(i,lh));pA.push(poisson(i,la));}
+
+  let h=0,d=0,a=0,best={score:"0:0",p:-1};
+  for(let i=0;i<=12;i++) for(let j=0;j<=12;j++){
+    const p=pH[i]*pA[j];
+    if(i>j) h+=p; else if(i===j) d+=p; else a+=p;
+    if(p>best.p) best={score:i+":"+j,p};
+  }
+  const total=h+d+a;
+  if (!total) return null;
+  return {probs:[h/total,d/total,a/total],score:best.score,
+    lambdaHome:lh,lambdaAway:la};
+}
+
+function forecastA(m, comp, global, teamComp, teamAll) {
+  const cs=comp.get(m.competition);
+  const gs=global;
+  const globalAvg=gs.n?(gs.homeGF+gs.awayGF)/(2*gs.n):1.25;
+  const compAvg=cs&&cs.n?(cs.homeGF+cs.awayGF)/(2*cs.n):globalAvg;
+
+  function teamAvg(team) {
+    const c=teamComp.get(m.competition+"\0"+team);
+    const all=teamAll.get(team);
+    const s=c&&c.n>=3?c:all;
+    if(!s||!s.n) return {gf:globalAvg,ga:globalAvg};
+    const w=s.n/(s.n+5);
+    return {
+      gf:w*s.gf/s.n+(1-w)*compAvg,
+      ga:w*s.ga/s.n+(1-w)*compAvg
+    };
   }
 
-  $("examples").innerHTML = rows.map(x => `
-    <tr>
-      <td>${esc(x.day)}</td>
-      <td>${esc(x.competition)}</td>
-      <td>${esc(x.home)} — ${esc(x.away)}</td>
-      <td>${esc(x.forecast.score)}</td>
-      <td>${x.hg}:${x.ag}</td>
-      <td>${predictedOutcome(x.forecast.probs) === outcomeIndex(x.hg, x.ag)
-        ? "<span class='good'>Угадан</span>"
-        : "<span class='bad'>Ошибка</span>"}</td>
-    </tr>
+  const h=teamAvg(m.home),a=teamAvg(m.away);
+  const hm=cs&&cs.n>=10?cs.homeGF/cs.n:(gs.n?gs.homeGF/gs.n:1.45);
+  const am=cs&&cs.n>=10?cs.awayGF/cs.n:(gs.n?gs.awayGF/gs.n:1.15);
+
+  return forecastFromLambdas(
+    hm*(h.gf/Math.max(.25,compAvg))*(a.ga/Math.max(.25,compAvg)),
+    am*(a.gf/Math.max(.25,compAvg))*(h.ga/Math.max(.25,compAvg))
+  );
+}
+
+function forecastB(m,comp,global) {
+  const c=comp.get(m.competition);
+  const h=c&&c.n?c.homeGF/c.n:(global.n?global.homeGF/global.n:1.45);
+  const a=c&&c.n?c.awayGF/c.n:(global.n?global.awayGF/global.n:1.15);
+  return forecastFromLambdas(h,a);
+}
+
+function newStats() {
+  return {n:0,gf:0,ga:0,homeGF:0,awayGF:0};
+}
+
+function addHistory(m,comp,global,teamComp,teamAll) {
+  let c=comp.get(m.competition);
+  if(!c){c=newStats();comp.set(m.competition,c);}
+  c.n++; c.homeGF+=m.hg; c.awayGF+=m.ag; c.gf+=m.hg+m.ag; c.ga+=m.hg+m.ag;
+  global.n++; global.homeGF+=m.hg; global.awayGF+=m.ag;
+  global.gf+=m.hg+m.ag; global.ga+=m.hg+m.ag;
+
+  const hkey=m.competition+"\0"+m.home;
+  const akey=m.competition+"\0"+m.away;
+  if(!teamComp.has(hkey))teamComp.set(hkey,{n:0,gf:0,ga:0});
+  if(!teamComp.has(akey))teamComp.set(akey,{n:0,gf:0,ga:0});
+  if(!teamAll.has(m.home))teamAll.set(m.home,{n:0,gf:0,ga:0});
+  if(!teamAll.has(m.away))teamAll.set(m.away,{n:0,gf:0,ga:0});
+
+  for(const s of [teamComp.get(hkey),teamAll.get(m.home)]){
+    s.n++;s.gf+=m.hg;s.ga+=m.ag;
+  }
+  for(const s of [teamComp.get(akey),teamAll.get(m.away)]){
+    s.n++;s.gf+=m.ag;s.ga+=m.hg;
+  }
+}
+
+function renderMain(s, skipped) {
+  $("mTested").textContent=s.n;
+  $("mAccuracy").textContent=pct(s.correct,s.n);
+  $("mBrier").textContent=avg(s.brier,s.n);
+  $("mLogLoss").textContent=avg(s.logloss,s.n);
+  $("mHomeMae").textContent=avg(s.homeMae,s.n);
+  $("mAwayMae").textContent=avg(s.awayMae,s.n);
+  $("mExact").textContent=pct(s.exact,s.n);
+  $("mSkipped").textContent=skipped;
+}
+
+function renderComparison(rows) {
+  $("comparison").innerHTML=rows.map(([name,s])=>`
+    <tr><td>${esc(name)}</td><td>${s.n}</td>
+    <td>${pct(s.correct,s.n)}</td><td>${avg(s.brier,s.n)}</td>
+    <td>${avg(s.logloss,s.n)}</td>
+    <td>${avg(s.homeMae+s.awayMae,2*s.n)}</td></tr>
   `).join("");
 }
 
-function resetMetrics() {
-  for (const id of [
-    "mTested", "mAccuracy", "mBrier", "mLogLoss",
-    "mHomeMae", "mAwayMae", "mExact", "mBtts"
-  ]) $(id).textContent = "—";
+function renderExamples(rows) {
+  const list=rows.slice(-40).reverse();
+  if(!list.length){
+    $("examples").innerHTML="<tr><td colspan='6'>Нет прогнозов Brain.</td></tr>";
+    return;
+  }
+  $("examples").innerHTML=list.map(x=>{
+    const correct=pick(x.f.probs)===outcome(x.m.hg,x.m.ag);
+    return `<tr><td>${esc(x.m.day)}</td><td>${esc(x.m.competition)}</td>
+      <td>${esc(x.m.home)} — ${esc(x.m.away)}</td>
+      <td>${esc(x.f.score)}</td><td>${x.m.hg}:${x.m.ag}</td>
+      <td class="${correct?"good":"bad"}">${correct?"Угадан":"Ошибка"}</td></tr>`;
+  }).join("");
 }
 
 async function runWalkForward() {
-  if (!normalizedMatches.length) {
-    await loadHistory();
-    if (!normalizedMatches.length) return;
+  if(!matches.length){await loadHistory();if(!matches.length)return;}
+
+  $("runButton").disabled=true;
+  $("loadButton").disabled=true;
+  $("progressBar").style.width="0%";
+  $("runStatus").textContent="Запускаю исторический тест…";
+
+  const selected=$("competition").value;
+  const minHistory=Number($("minHistory").value)||20;
+  const testMatches=selected==="ALL"?matches:matches.filter(m=>m.competition===selected);
+  const byDay=new Map();
+
+  for(const m of testMatches){
+    if(!byDay.has(m.day))byDay.set(m.day,[]);
+    byDay.get(m.day).push(m);
   }
 
-  $("runButton").disabled = true;
-  $("loadButton").disabled = true;
-  $("progressBar").style.width = "0%";
-  $("runStatus").textContent = "Подготавливаю хронологическую проверку…";
-  resetMetrics();
+  const days=[...byDay.keys()].sort();
+  const comp=new Map(),teamComp=new Map(),teamAll=new Map();
+  const global=newStats();
+  const A=metric(),B=metric(),Brain=metric();
+  const examples=[];
+  let skippedHistory=0,skippedBrain=0,brainErrors=0;
 
-  const selected = $("competition").value;
-  const minHistory = Number($("minHistory").value) || 20;
-  const matches = selected === "ALL"
-    ? normalizedMatches
-    : normalizedMatches.filter(m => m.competition === selected);
-
-  const compStats = new Map();
-  const teamComp = new Map();
-  const teamAll = new Map();
-  const globalStats = newStats();
-
-  const metricA = createMetric();
-  const metricB = createMetric();
-  const examples = [];
-  let skippedNoHistory = 0;
-  let eligible = 0;
+  // Для Brain сохраняем исходную схему результатов.
+  // В историю каждого прогноза попадут только более ранние календарные даты.
+  const allHistoryMatches=matches.filter(m=>selected==="ALL"||m.competition===selected);
 
   try {
-    // Сгруппируем по календарным датам: никакой результат текущего дня
-    // не добавляется в историю до прогнозов для всех матчей этой даты.
-    const byDay = new Map();
-    for (const m of matches) {
-      if (!byDay.has(m.day)) byDay.set(m.day, []);
-      byDay.get(m.day).push(m);
-    }
-    const days = [...byDay.keys()].sort();
+    for(let di=0;di<days.length;di++){
+      const day=days[di],today=byDay.get(day);
+      const prior=allHistoryMatches.filter(m=>m.day<day);
 
-    for (let di = 0; di < days.length; di++) {
-      const day = days[di];
-      const today = byDay.get(day);
+      // Создаём Brain только на прошлых фактах, не на полном наборе будущих матчей.
+      const brainInput=prior.map(m=>({
+        id:m.id,date:m.date,competition:m.competition,
+        competition_name:m.competitionName,
+        home:m.home,away:m.away,
+        home_goals:m.hg,away_goals:m.ag,status:"FINISHED"
+      }));
+      const brain=new window.FEGBRAIN(brainInput);
 
-      for (const m of today) {
-        const cs = compStats.get(m.competition);
-        const priorCompetitionMatches = cs ? cs.n : 0;
+      for(const m of today){
+        const c=comp.get(m.competition);
+        if(!c||c.n<minHistory){skippedHistory++;continue;}
 
-        if (priorCompetitionMatches < minHistory) {
-          skippedNoHistory++;
-          continue;
+        const fa=forecastA(m,comp,global,teamComp,teamAll);
+        const fb=forecastB(m,comp,global);
+        updateMetric(A,fa,m);
+        updateMetric(B,fb,m);
+
+        try {
+          const result=brain.predict({
+            home:m.home,away:m.away,
+            competition:m.competition,
+            asOf:day+"T00:00:00.000Z"
+          });
+
+          if(result && result.status==="OK" &&
+             result.probabilities1X2 && result.topScores && result.topScores.length) {
+            const f={
+              probs:[
+                Number(result.probabilities1X2["1"]),
+                Number(result.probabilities1X2["X"]),
+                Number(result.probabilities1X2["2"])
+              ],
+              score:result.topScores[0].score,
+              lambdaHome:Number(result.lambdaHome),
+              lambdaAway:Number(result.lambdaAway)
+            };
+
+            if(f.probs.every(isNum)&&isNum(f.lambdaHome)&&isNum(f.lambdaAway)){
+              updateMetric(Brain,f,m);
+              if(examples.length<5000)examples.push({m,f});
+            } else {skippedBrain++;}
+          } else {
+            skippedBrain++;
+          }
+        } catch(e) {
+          brainErrors++;
+          skippedBrain++;
         }
-
-        eligible++;
-        const fa = makeForecastA(m, compStats, globalStats, teamComp, teamAll);
-        const fb = makeForecastB(m, compStats, globalStats);
-
-        updateMetric(metricA, fa, m);
-        updateMetric(metricB, fb, m);
-
-        if (examples.length < 5000) {
-          examples.push({...m, forecast: fa});
-        }
       }
 
-      // Только после расчёта прогнозов текущей даты добавляем её факты.
-      for (const m of today) {
-        addMatchToHistory(m, compStats, globalStats, teamComp, teamAll);
-      }
+      // Факты этого дня доступны только со следующего дня.
+      for(const m of today)addHistory(m,comp,global,teamComp,teamAll);
 
-      if (di % 20 === 0 || di === days.length - 1) {
-        const progress = Math.round(100 * (di + 1) / days.length);
-        $("progressBar").style.width = progress + "%";
-        $("runStatus").textContent =
-          "Обработано дат: " + (di + 1) + " / " + days.length +
-          "\nПроверяемых матчей найдено: " + eligible +
-          "\nИсключено из-за недостатка предшествующей истории турнира: " +
-          skippedNoHistory;
-        await new Promise(resolve => setTimeout(resolve, 0));
+      if(di%5===0||di===days.length-1){
+        $("progressBar").style.width=Math.round(100*(di+1)/days.length)+"%";
+        $("runStatus").textContent=
+          "Обработано дат: "+(di+1)+" / "+days.length+
+          "\nПрогнозов Brain: "+Brain.n+
+          "\nBrain без прогноза: "+skippedBrain+
+          "\nНедостаточно истории турнира: "+skippedHistory;
+        await new Promise(resolve=>setTimeout(resolve,0));
       }
     }
 
-    renderMainMetric(metricA);
-    renderComparison(metricA, metricB);
+    renderMain(Brain,skippedBrain);
+    renderComparison([
+      ["A — Команды + голы",A],
+      ["B — Среднее турнира",B],
+      ["FEG Brain "+(window.FEG_BRAIN_VERSION||""),Brain]
+    ]);
     renderExamples(examples);
 
-    const enough = metricA.n > 0;
-    $("runStatus").textContent =
-      (enough ? "Тест завершён." : "Тест завершён, но подходящих матчей недостаточно.") +
-      "\nМодель A: " + metricA.n + " прогнозов." +
-      "\nМодель B: " + metricB.n + " прогнозов." +
-      "\nИсключено из-за минимальной истории турнира: " + skippedNoHistory +
-      "\nПринцип: для каждого дня используются только матчи более ранних дат.";
+    $("runStatus").className="status "+(Brain.n?"good":"warn");
+    $("runStatus").textContent=
+      "Тест завершён.\n"+
+      "Модель A: "+A.n+" прогнозов.\n"+
+      "Модель B: "+B.n+" прогнозов.\n"+
+      "FEG Brain: "+Brain.n+" прогнозов.\n"+
+      "Brain без прогноза: "+skippedBrain+
+      "\nОшибок вызова Brain: "+brainErrors+
+      "\nВсе прогнозы построены только на предыдущих датах.";
 
-    $("runStatus").className = "status " + (enough ? "good" : "warn");
-
-    $("diagnostics").textContent =
-      "Данных загружено: " + rawMatches.length +
-      ". Подтверждённых фактов: " + normalizedMatches.length +
-      ". Матчей в тесте: " + metricA.n +
-      ". Минимум истории турнира: " + minHistory +
-      ". Турнир: " + (selected === "ALL" ? "все" : selected) +
-      ".\nВажно: это независимые базовые формулы, не фактическая проверка текущего brain.js.";
-
-    lastRun = {metricA, metricB, selected, minHistory};
-  } catch (e) {
-    $("runStatus").textContent = "Ошибка теста: " + e.message;
-    $("runStatus").className = "status bad";
+    $("diagnostics").textContent=
+      "Версия подключённого Brain: "+(window.FEG_BRAIN_VERSION||"не указана")+
+      "\nФактов в выбранной истории: "+allHistoryMatches.length+
+      "\nМинимум истории турнира: "+minHistory+
+      "\nВыбранный турнир: "+(selected==="ALL"?"все":selected)+
+      "\nПрогнозы A: "+A.n+"; B: "+B.n+"; Brain: "+Brain.n+
+      "\nИсключено из-за недостатка истории турнира: "+skippedHistory+
+      "\nBrain без прогноза: "+skippedBrain+
+      "\nОшибок вызова Brain: "+brainErrors+
+      "\nВнимание: это лабораторная проверка текущей версии brain.js; формула не менялась.";
+  } catch(e) {
+    $("runStatus").className="status bad";
+    $("runStatus").textContent="Ошибка теста: "+e.message;
   } finally {
-    $("runButton").disabled = false;
-    $("loadButton").disabled = false;
+    $("runButton").disabled=false;
+    $("loadButton").disabled=false;
   }
 }
 
-$("loadButton").addEventListener("click", loadHistory);
-$("runButton").addEventListener("click", runWalkForward);
-
-// Автоматическая загрузка после открытия опубликованной страницы.
+$("loadButton").addEventListener("click",loadHistory);
+$("runButton").addEventListener("click",runWalkForward);
 loadHistory();
 </script>
 </body>
