@@ -5,6 +5,10 @@
  * FIX: история команды содержит только матчи
  * с подтверждённым числовым счётом.
  *
+ * FIX: minMatches поднят с 3 до 5,
+ * чтобы Brain не считал прогнозы
+ * на командах с короткой историей.
+ *
  * Формула и параметры Brain 0.1.0 сохранены.
  * Missing != 0.
  */
@@ -17,7 +21,7 @@ const FEG_EXG_VERSION = "0.1.0";
 const EPS = 1e-12;
 
 const CONFIG = Object.freeze({
-    minMatches: 3,
+    minMatches: 5,
     formMatches: 5,
     exgMatches: 6,
     exgWeights: Object.freeze([1, 2, 3, 1, 3, 4]),
@@ -133,22 +137,6 @@ function matchDate(match) {
     return Number.isFinite(timestamp) ? timestamp : null;
 }
 
-/*
- * IMPORTANT FIX:
- *
- * Статус FINISHED сам по себе не доказывает,
- * что в results.json уже есть готовый счёт.
- *
- * Раньше матч со статусом FINISHED мог попасть
- * в историю даже с отсутствующими голами.
- * Тогда такой матч занимал место среди последних
- * пяти и отображался в форме знаком вопроса.
- *
- * Теперь принимаются только записи с двумя
- * числовыми неотрицательными значениями голов.
- *
- * Отсутствующий счёт не превращаем в 0:0.
- */
 function isFinished(match) {
     if (!match || typeof match !== "object") {
         return false;
@@ -254,10 +242,6 @@ function formValue(result) {
 }
 
 function getForm(matches, team, count = CONFIG.formMatches) {
-    /*
-     * matches уже отсортированы по дате и очищены
-     * от записей без счёта функцией cleanResults().
-     */
     const recent = matches.slice(-count);
 
     const sequence = recent.map(match => ({
@@ -368,9 +352,6 @@ function getLeagueAverages(matches) {
 
 /* ============================================================
  * FEG ESTIMATED xG
- *
- * Экспериментальная оценка на основе голов,
- * а не настоящий provider xG.
  * ============================================================ */
 
 function calculateEstimatedXG(matches, team) {
@@ -538,20 +519,9 @@ function eloUpdate(homeRating, awayRating, homeGoals, awayGoals) {
     };
 }
 
-/*
- * ============================================================
- * FIX: Elo теперь считается по всем турнирам.
- * ============================================================
- *
- * competition оставлен в аргументах для совместимости,
- * но Elo строится по всей доступной истории матчей,
- * чтобы форма, eXG и рейтинг учитывали и национальный
- * чемпионат, и кубок, и Лигу чемпионов, и т.п.
- */
 function buildEloRatings(results, competition = null, asOf = null) {
     const ratings = {};
 
-    // Elo строится по всем турнирам.
     const matches = getLeagueMatches(results, null, asOf);
 
     for (const match of matches) {
@@ -583,24 +553,9 @@ function buildEloRatings(results, competition = null, asOf = null) {
     return ratings;
 }
 
-/*
- * ============================================================
- * FIX: buildTeamState использует ВСЮ историю команды
- * ============================================================
- *
- * Раньше, если у команды набиралось >= CONFIG.minMatches
- * матчей в выбранном турнире, остальная история отбрасывалась.
- * Из-за этого матчи в Лиге чемпионов или кубке не попадали
- * в форму, средние голы, домашнюю/гостевую статистику и eXG.
- *
- * Теперь buildTeamState всегда работает с полной историей
- * команды во всех турнирах.
- */
 function buildTeamState(results, team, competition = null, asOf = null) {
-    // ВСЯ история команды во всех турнирах.
     const matches = getTeamMatches(results, team, asOf);
 
-    // Не фильтруем историю по выбранному чемпионату.
     const stats = getGoalStats(matches, team);
     const home = getVenueStats(matches, team, "home");
     const away = getVenueStats(matches, team, "away");
@@ -614,7 +569,6 @@ function buildTeamState(results, team, competition = null, asOf = null) {
         asOf
     );
 
-    // Elo также учитывает все турниры.
     const eloRatings = buildEloRatings(
         results,
         null,
@@ -629,7 +583,6 @@ function buildTeamState(results, team, competition = null, asOf = null) {
         team,
         competition: competition || null,
 
-        // Количество матчей в общей истории.
         matches: matches.length,
 
         goalsForPerMatch: round(stats.goalsFor),
