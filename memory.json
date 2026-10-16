@@ -1,37 +1,37 @@
 {
   "version": "FEG-MEMORY-0.2",
-  "updated_at": "2026-10-16T04:35:56.281602+00:00",
-  "match_count": 472,
+  "updated_at": "2026-10-16T11:28:34.069164+00:00",
+  "match_count": 476,
   "teams": {
     "SC Cambuur-Leeuwarden": {
-      "matches": 7,
-      "goals_for": 10,
+      "matches": 8,
+      "goals_for": 11,
       "goals_against": 19,
       "last5": [
         "L",
-        "L",
         "D",
         "W",
-        "D"
+        "D",
+        "W"
       ],
-      "last_match": "2026-09-19T14:30:00Z",
-      "avg_goals_for": 1.4286,
-      "avg_goals_against": 2.7143
+      "last_match": "2026-10-11T12:30:00Z",
+      "avg_goals_for": 1.375,
+      "avg_goals_against": 2.375
     },
     "SBV Excelsior": {
-      "matches": 7,
-      "goals_for": 15,
-      "goals_against": 9,
+      "matches": 8,
+      "goals_for": 16,
+      "goals_against": 14,
       "last5": [
-        "W",
         "W",
         "D",
         "L",
-        "D"
+        "D",
+        "L"
       ],
-      "last_match": "2026-09-19T18:00:00Z",
-      "avg_goals_for": 2.1429,
-      "avg_goals_against": 1.2857
+      "last_match": "2026-10-11T14:45:00Z",
+      "avg_goals_for": 2.0,
+      "avg_goals_against": 1.75
     },
     "GD Estoril Praia": {
       "matches": 8,
@@ -79,19 +79,19 @@
       "avg_goals_against": 1.75
     },
     "Telstar 1963": {
-      "matches": 7,
-      "goals_for": 5,
-      "goals_against": 12,
+      "matches": 8,
+      "goals_for": 7,
+      "goals_against": 14,
       "last5": [
-        "L",
         "D",
         "L",
         "D",
-        "L"
+        "L",
+        "D"
       ],
-      "last_match": "2026-09-20T12:30:00Z",
-      "avg_goals_for": 0.7143,
-      "avg_goals_against": 1.7143
+      "last_match": "2026-10-11T12:30:00Z",
+      "avg_goals_for": 0.875,
+      "avg_goals_against": 1.75
     },
     "CS Marítimo": {
       "matches": 8,
@@ -139,19 +139,19 @@
       "avg_goals_against": 2.125
     },
     "Willem II Tilburg": {
-      "matches": 7,
-      "goals_for": 6,
-      "goals_against": 20,
+      "matches": 8,
+      "goals_for": 7,
+      "goals_against": 23,
       "last5": [
-        "D",
         "L",
         "D",
+        "L",
         "L",
         "L"
       ],
-      "last_match": "2026-09-19T19:00:00Z",
-      "avg_goals_for": 0.8571,
-      "avg_goals_against": 2.8571
+      "last_match": "2026-10-11T10:15:00Z",
+      "avg_goals_for": 0.875,
+      "avg_goals_against": 2.875
     },
     "Vitória SC": {
       "matches": 8,
@@ -229,19 +229,19 @@
       "avg_goals_against": 1.0
     },
     "ADO Den Haag": {
-      "matches": 7,
-      "goals_for": 7,
-      "goals_against": 17,
+      "matches": 8,
+      "goals_for": 9,
+      "goals_against": 19,
       "last5": [
-        "L",
         "D",
         "L",
         "L",
+        "D",
         "D"
       ],
-      "last_match": "2026-09-19T14:30:00Z",
-      "avg_goals_for": 1.0,
-      "avg_goals_against": 2.4286
+      "last_match": "2026-10-11T12:30:00Z",
+      "avg_goals_for": 1.125,
+      "avg_goals_against": 2.375
     },
     "CF Estrela da Amadora": {
       "matches": 8,
@@ -304,49 +304,49 @@
       "avg_goals_against": 1.4
     },
     "FC Groningen": {
-      "matches": 7,
-      "goals_for": 15,
-      "goals_against": 13,
+      "matches": 8,
+      "goals_for": 20,
+      "goals_against": 14,
       "last5": [
         "L",
-        "L",
         "D",
         "D",
+        "W",
         "W"
       ],
-      "last_match": "2026-09-18T18:00:00Z",
-      "avg_goals_for": 2.1429,
-      "avg_goals_against": 1.8571
+      "last_match": "2026-10-11T14:45:00Z",
+      "avg_goals_for": 2.5,
+      "avg_goals_against": 1.75
     },
     "FC Utrecht": {
-      "matches": 7,
-      "goals_for": 11,
-      "goals_against": 24,
+      "matches": 8,
+      "goals_for": 14,
+      "goals_against": 25,
       "last5": [
-        "D",
         "L",
         "D",
         "W",
-        "L"
+        "L",
+        "W"
       ],
-      "last_match": "2026-09-20T10:15:00Z",
-      "avg_goals_for": 1.5714,
-      "avg_goals_against": 3.4286
+      "last_match": "2026-10-11T10:15:00Z",
+      "avg_goals_for": 1.75,
+      "avg_goals_against": 3.125
     },
     "PEC Zwolle": {
-      "matches": 7,
+      "matches": 8,
       "goals_for": 6,
-      "goals_against": 20,
+      "goals_against": 21,
       "last5": [
-        "W",
         "L",
         "D",
         "L",
+        "L",
         "L"
       ],
-      "last_match": "2026-09-18T18:00:00Z",
-      "avg_goals_for": 0.8571,
-      "avg_goals_against": 2.8571
+      "last_match": "2026-10-11T12:30:00Z",
+      "avg_goals_for": 0.75,
+      "avg_goals_against": 2.625
     },
     "AFC Ajax": {
       "matches": 8,
