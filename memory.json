@@ -1,7 +1,7 @@
 {
   "version": "FEG-MEMORY-0.2",
-  "updated_at": "2026-10-16T21:14:56.387431+00:00",
-  "match_count": 5584,
+  "updated_at": "2026-10-17T04:33:07.298397+00:00",
+  "match_count": 5587,
   "teams": {
     "FC Groningen": {
       "matches": 76,
@@ -889,19 +889,19 @@
       "avg_goals_against": 1.7143
     },
     "Olympique de Marseille": {
-      "matches": 81,
-      "goals_for": 155,
+      "matches": 82,
+      "goals_for": 157,
       "goals_against": 114,
       "last5": [
-        "W",
         "L",
         "L",
         "L",
-        "L"
+        "L",
+        "W"
       ],
-      "last_match": "2026-09-20T18:45:00Z",
-      "avg_goals_for": 1.9136,
-      "avg_goals_against": 1.4074
+      "last_match": "2026-10-11T18:45:00Z",
+      "avg_goals_for": 1.9146,
+      "avg_goals_against": 1.3902
     },
     "West Ham United FC": {
       "matches": 76,
@@ -1204,34 +1204,34 @@
       "avg_goals_against": 1.3902
     },
     "AJ Auxerre": {
-      "matches": 73,
-      "goals_for": 89,
-      "goals_against": 107,
+      "matches": 74,
+      "goals_for": 90,
+      "goals_against": 111,
       "last5": [
         "L",
         "L",
+        "W",
+        "W",
+        "L"
+      ],
+      "last_match": "2026-10-11T15:15:00Z",
+      "avg_goals_for": 1.2162,
+      "avg_goals_against": 1.5
+    },
+    "OGC Nice": {
+      "matches": 74,
+      "goals_for": 108,
+      "goals_against": 108,
+      "last5": [
+        "L",
+        "D",
         "L",
         "W",
         "W"
       ],
-      "last_match": "2026-09-20T13:00:00Z",
-      "avg_goals_for": 1.2192,
-      "avg_goals_against": 1.4658
-    },
-    "OGC Nice": {
-      "matches": 73,
-      "goals_for": 106,
-      "goals_against": 107,
-      "last5": [
-        "D",
-        "L",
-        "D",
-        "L",
-        "W"
-      ],
-      "last_match": "2026-09-20T15:15:00Z",
-      "avg_goals_for": 1.4521,
-      "avg_goals_against": 1.4658
+      "last_match": "2026-10-11T13:00:00Z",
+      "avg_goals_for": 1.4595,
+      "avg_goals_against": 1.4595
     },
     "Montpellier HSC": {
       "matches": 34,
@@ -1249,19 +1249,19 @@
       "avg_goals_against": 2.3235
     },
     "RC Strasbourg Alsace": {
-      "matches": 73,
-      "goals_for": 124,
-      "goals_against": 101,
+      "matches": 74,
+      "goals_for": 125,
+      "goals_against": 103,
       "last5": [
-        "L",
         "W",
         "W",
         "D",
+        "L",
         "L"
       ],
-      "last_match": "2026-09-19T15:15:00Z",
-      "avg_goals_for": 1.6986,
-      "avg_goals_against": 1.3836
+      "last_match": "2026-10-11T13:00:00Z",
+      "avg_goals_for": 1.6892,
+      "avg_goals_against": 1.3919
     },
     "Toulouse FC": {
       "matches": 75,
@@ -1444,19 +1444,19 @@
       "avg_goals_against": 1.2651
     },
     "Stade Rennais FC 1901": {
-      "matches": 73,
-      "goals_for": 118,
-      "goals_against": 109,
+      "matches": 74,
+      "goals_for": 122,
+      "goals_against": 110,
       "last5": [
-        "D",
         "W",
         "W",
         "W",
-        "L"
+        "L",
+        "W"
       ],
-      "last_match": "2026-09-19T18:45:00Z",
-      "avg_goals_for": 1.6164,
-      "avg_goals_against": 1.4932
+      "last_match": "2026-10-11T15:15:00Z",
+      "avg_goals_for": 1.6486,
+      "avg_goals_against": 1.4865
     },
     "Olympique Lyonnais": {
       "matches": 74,
@@ -2704,19 +2704,19 @@
       "avg_goals_against": 2.1429
     },
     "ES Troyes AC": {
-      "matches": 5,
+      "matches": 6,
       "goals_for": 4,
-      "goals_against": 11,
+      "goals_against": 13,
       "last5": [
-        "D",
         "W",
+        "L",
         "L",
         "L",
         "L"
       ],
-      "last_match": "2026-09-19T18:45:00Z",
-      "avg_goals_for": 0.8,
-      "avg_goals_against": 2.2
+      "last_match": "2026-10-11T18:45:00Z",
+      "avg_goals_for": 0.6667,
+      "avg_goals_against": 2.1667
     },
     "Frosinone Calcio": {
       "matches": 7,
