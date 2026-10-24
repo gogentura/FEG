@@ -1,7 +1,7 @@
 {
   "version": "FEG-MEMORY-0.2",
-  "updated_at": "2026-10-24T11:07:38.757022+00:00",
-  "match_count": 5666,
+  "updated_at": "2026-10-24T16:01:54.217048+00:00",
+  "match_count": 5667,
   "teams": {
     "FC Groningen": {
       "matches": 77,
@@ -1834,19 +1834,19 @@
       "avg_goals_against": 1.5581
     },
     "FC Augsburg": {
-      "matches": 74,
-      "goals_for": 96,
-      "goals_against": 124,
+      "matches": 75,
+      "goals_for": 97,
+      "goals_against": 125,
       "last5": [
-        "W",
         "D",
         "L",
         "D",
-        "L"
+        "L",
+        "D"
       ],
-      "last_match": "2026-10-17T13:30:00Z",
-      "avg_goals_for": 1.2973,
-      "avg_goals_against": 1.6757
+      "last_match": "2026-10-24T13:30:00Z",
+      "avg_goals_for": 1.2933,
+      "avg_goals_against": 1.6667
     },
     "SV Werder Bremen": {
       "matches": 74,
@@ -1879,19 +1879,19 @@
       "avg_goals_against": 1.4324
     },
     "1. FC Union Berlin": {
-      "matches": 74,
-      "goals_for": 84,
-      "goals_against": 126,
+      "matches": 75,
+      "goals_for": 85,
+      "goals_against": 127,
       "last5": [
         "L",
         "L",
-        "L",
         "W",
+        "D",
         "D"
       ],
-      "last_match": "2026-10-17T13:30:00Z",
-      "avg_goals_for": 1.1351,
-      "avg_goals_against": 1.7027
+      "last_match": "2026-10-24T13:30:00Z",
+      "avg_goals_for": 1.1333,
+      "avg_goals_against": 1.6933
     },
     "Borussia Dortmund": {
       "matches": 101,
