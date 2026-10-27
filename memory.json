@@ -1,7 +1,7 @@
 {
   "version": "FEG-MEMORY-0.2",
-  "updated_at": "2026-10-27T18:07:20.342921+00:00",
-  "match_count": 5725,
+  "updated_at": "2026-10-27T22:19:55.606148+00:00",
+  "match_count": 5728,
   "teams": {
     "FC Groningen": {
       "matches": 78,
@@ -1099,19 +1099,19 @@
       "avg_goals_against": 1.0426
     },
     "Torino FC": {
-      "matches": 84,
-      "goals_for": 96,
-      "goals_against": 119,
+      "matches": 85,
+      "goals_for": 97,
+      "goals_against": 122,
       "last5": [
-        "L",
         "D",
         "W",
         "W",
-        "W"
+        "W",
+        "L"
       ],
-      "last_match": "2026-10-23T18:45:00Z",
-      "avg_goals_for": 1.1429,
-      "avg_goals_against": 1.4167
+      "last_match": "2026-10-27T19:45:00Z",
+      "avg_goals_for": 1.1412,
+      "avg_goals_against": 1.4353
     },
     "AS Monaco FC": {
       "matches": 96,
@@ -1474,49 +1474,49 @@
       "avg_goals_against": 1.2237
     },
     "Cagliari Calcio": {
-      "matches": 84,
-      "goals_for": 86,
-      "goals_against": 118,
+      "matches": 85,
+      "goals_for": 88,
+      "goals_against": 122,
       "last5": [
         "W",
-        "W",
         "D",
+        "L",
         "L",
         "L"
       ],
-      "last_match": "2026-10-24T13:00:00Z",
-      "avg_goals_for": 1.0238,
-      "avg_goals_against": 1.4048
+      "last_match": "2026-10-27T19:45:00Z",
+      "avg_goals_for": 1.0353,
+      "avg_goals_against": 1.4353
     },
     "AS Roma": {
-      "matches": 87,
-      "goals_for": 142,
-      "goals_against": 77,
+      "matches": 88,
+      "goals_for": 146,
+      "goals_against": 79,
       "last5": [
-        "D",
         "L",
         "W",
         "W",
-        "D"
+        "D",
+        "W"
       ],
-      "last_match": "2026-10-24T16:00:00Z",
-      "avg_goals_for": 1.6322,
-      "avg_goals_against": 0.8851
+      "last_match": "2026-10-27T19:45:00Z",
+      "avg_goals_for": 1.6591,
+      "avg_goals_against": 0.8977
     },
     "SS Lazio": {
-      "matches": 84,
-      "goals_for": 118,
-      "goals_against": 94,
+      "matches": 85,
+      "goals_for": 124,
+      "goals_against": 96,
       "last5": [
-        "D",
+        "W",
         "W",
         "W",
         "W",
         "W"
       ],
-      "last_match": "2026-10-24T18:45:00Z",
-      "avg_goals_for": 1.4048,
-      "avg_goals_against": 1.119
+      "last_match": "2026-10-27T17:30:00Z",
+      "avg_goals_for": 1.4588,
+      "avg_goals_against": 1.1294
     },
     "Venezia FC": {
       "matches": 46,
@@ -1639,19 +1639,19 @@
       "avg_goals_against": 1.0096
     },
     "Como 1907": {
-      "matches": 87,
-      "goals_for": 138,
-      "goals_against": 93,
+      "matches": 88,
+      "goals_for": 141,
+      "goals_against": 94,
       "last5": [
-        "D",
         "L",
+        "W",
         "W",
         "W",
         "W"
       ],
-      "last_match": "2026-10-24T13:00:00Z",
-      "avg_goals_for": 1.5862,
-      "avg_goals_against": 1.069
+      "last_match": "2026-10-27T19:45:00Z",
+      "avg_goals_for": 1.6023,
+      "avg_goals_against": 1.0682
     },
     "Leicester City FC": {
       "matches": 38,
@@ -2344,19 +2344,19 @@
       "avg_goals_against": 1.5417
     },
     "US Sassuolo Calcio": {
-      "matches": 46,
-      "goals_for": 58,
-      "goals_against": 66,
+      "matches": 47,
+      "goals_for": 60,
+      "goals_against": 72,
       "last5": [
-        "W",
         "L",
         "D",
         "L",
+        "L",
         "L"
       ],
-      "last_match": "2026-10-24T13:00:00Z",
-      "avg_goals_for": 1.2609,
-      "avg_goals_against": 1.4348
+      "last_match": "2026-10-27T17:30:00Z",
+      "avg_goals_for": 1.2766,
+      "avg_goals_against": 1.5319
     },
     "US Cremonese": {
       "matches": 38,
