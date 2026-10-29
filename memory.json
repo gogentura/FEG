@@ -1,7 +1,7 @@
 {
   "version": "FEG-MEMORY-0.2",
-  "updated_at": "2026-10-29T13:08:22.973603+00:00",
-  "match_count": 5733,
+  "updated_at": "2026-10-29T22:50:08.492907+00:00",
+  "match_count": 5735,
   "teams": {
     "FC Groningen": {
       "matches": 78,
@@ -979,19 +979,19 @@
       "avg_goals_against": 1.4
     },
     "ACF Fiorentina": {
-      "matches": 84,
-      "goals_for": 110,
-      "goals_against": 110,
+      "matches": 85,
+      "goals_for": 112,
+      "goals_against": 112,
       "last5": [
-        "W",
         "D",
         "L",
         "L",
-        "L"
+        "L",
+        "D"
       ],
-      "last_match": "2026-10-25T11:30:00Z",
-      "avg_goals_for": 1.3095,
-      "avg_goals_against": 1.3095
+      "last_match": "2026-10-29T19:45:00Z",
+      "avg_goals_for": 1.3176,
+      "avg_goals_against": 1.3176
     },
     "Stade de Reims": {
       "matches": 34,
@@ -1564,34 +1564,34 @@
       "avg_goals_against": 1.1282
     },
     "US Lecce": {
-      "matches": 84,
-      "goals_for": 64,
-      "goals_against": 122,
+      "matches": 85,
+      "goals_for": 65,
+      "goals_against": 127,
       "last5": [
-        "W",
         "L",
         "L",
         "W",
+        "L",
         "L"
       ],
-      "last_match": "2026-10-25T17:00:00Z",
-      "avg_goals_for": 0.7619,
-      "avg_goals_against": 1.4524
+      "last_match": "2026-10-29T17:30:00Z",
+      "avg_goals_for": 0.7647,
+      "avg_goals_against": 1.4941
     },
     "Atalanta BC": {
-      "matches": 106,
-      "goals_for": 181,
-      "goals_against": 122,
+      "matches": 107,
+      "goals_for": 183,
+      "goals_against": 124,
       "last5": [
-        "L",
         "L",
         "W",
         "L",
+        "D",
         "D"
       ],
-      "last_match": "2026-10-25T14:00:00Z",
-      "avg_goals_for": 1.7075,
-      "avg_goals_against": 1.1509
+      "last_match": "2026-10-29T19:45:00Z",
+      "avg_goals_for": 1.7103,
+      "avg_goals_against": 1.1589
     },
     "Real Valladolid CF": {
       "matches": 38,
@@ -2719,19 +2719,19 @@
       "avg_goals_against": 2.0
     },
     "Frosinone Calcio": {
-      "matches": 8,
-      "goals_for": 17,
-      "goals_against": 13,
+      "matches": 9,
+      "goals_for": 22,
+      "goals_against": 14,
       "last5": [
-        "D",
         "W",
         "L",
         "W",
-        "D"
+        "D",
+        "W"
       ],
-      "last_match": "2026-10-25T14:00:00Z",
-      "avg_goals_for": 2.125,
-      "avg_goals_against": 1.625
+      "last_match": "2026-10-29T17:30:00Z",
+      "avg_goals_for": 2.4444,
+      "avg_goals_against": 1.5556
     },
     "SC Paderborn 07": {
       "matches": 7,
