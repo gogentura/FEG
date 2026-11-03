@@ -1,7 +1,7 @@
 {
   "version": "FEG-MEMORY-0.2",
-  "updated_at": "2026-11-03T01:02:48.240114+00:00",
-  "match_count": 5800,
+  "updated_at": "2026-11-03T14:22:19.878923+00:00",
+  "match_count": 5801,
   "teams": {
     "FC Groningen": {
       "matches": 79,
@@ -874,19 +874,19 @@
       "avg_goals_against": 1.3294
     },
     "Stade Brestois 29": {
-      "matches": 86,
-      "goals_for": 119,
+      "matches": 87,
+      "goals_for": 121,
       "goals_against": 147,
       "last5": [
         "L",
-        "L",
         "W",
         "D",
-        "L"
+        "L",
+        "W"
       ],
-      "last_match": "2026-10-23T18:45:00Z",
-      "avg_goals_for": 1.3837,
-      "avg_goals_against": 1.7093
+      "last_match": "2026-11-02T19:45:00Z",
+      "avg_goals_for": 1.3908,
+      "avg_goals_against": 1.6897
     },
     "Olympique de Marseille": {
       "matches": 85,
@@ -2269,19 +2269,19 @@
       "avg_goals_against": 1.6735
     },
     "FC Lorient": {
-      "matches": 42,
+      "matches": 43,
       "goals_for": 55,
-      "goals_against": 57,
+      "goals_against": 59,
       "last5": [
-        "D",
         "L",
         "W",
         "W",
-        "D"
+        "D",
+        "L"
       ],
-      "last_match": "2026-10-25T16:15:00Z",
-      "avg_goals_for": 1.3095,
-      "avg_goals_against": 1.3571
+      "last_match": "2026-11-02T19:45:00Z",
+      "avg_goals_for": 1.2791,
+      "avg_goals_against": 1.3721
     },
     "FC Metz": {
       "matches": 34,
