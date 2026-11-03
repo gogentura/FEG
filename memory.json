@@ -1,7 +1,7 @@
 {
   "version": "FEG-MEMORY-0.2",
-  "updated_at": "2026-11-02T16:02:10.444434+00:00",
-  "match_count": 5794,
+  "updated_at": "2026-11-03T01:02:48.240114+00:00",
+  "match_count": 5800,
   "teams": {
     "FC Groningen": {
       "matches": 79,
@@ -259,19 +259,19 @@
       "avg_goals_against": 0.716
     },
     "Gil Vicente FC": {
-      "matches": 77,
+      "matches": 78,
       "goals_for": 89,
       "goals_against": 92,
       "last5": [
-        "L",
         "D",
         "W",
         "W",
-        "L"
+        "L",
+        "D"
       ],
-      "last_match": "2026-10-24T19:30:00Z",
-      "avg_goals_for": 1.1558,
-      "avg_goals_against": 1.1948
+      "last_match": "2026-11-02T20:15:00Z",
+      "avg_goals_for": 1.141,
+      "avg_goals_against": 1.1795
     },
     "Sparta Rotterdam": {
       "matches": 79,
@@ -469,19 +469,19 @@
       "avg_goals_against": 1.0513
     },
     "Sport Lisboa e Benfica": {
-      "matches": 99,
-      "goals_for": 216,
+      "matches": 100,
+      "goals_for": 217,
       "goals_against": 95,
       "last5": [
         "W",
-        "W",
         "L",
+        "W",
         "W",
         "W"
       ],
-      "last_match": "2026-10-26T18:45:00Z",
-      "avg_goals_for": 2.1818,
-      "avg_goals_against": 0.9596
+      "last_match": "2026-11-02T20:15:00Z",
+      "avg_goals_for": 2.17,
+      "avg_goals_against": 0.95
     },
     "Sporting Clube de Braga": {
       "matches": 78,
@@ -529,19 +529,19 @@
       "avg_goals_against": 1.5385
     },
     "Vitória SC": {
-      "matches": 77,
+      "matches": 78,
       "goals_for": 96,
       "goals_against": 98,
       "last5": [
-        "D",
         "L",
         "D",
         "L",
-        "W"
+        "W",
+        "D"
       ],
-      "last_match": "2026-10-23T19:45:00Z",
-      "avg_goals_for": 1.2468,
-      "avg_goals_against": 1.2727
+      "last_match": "2026-11-02T20:15:00Z",
+      "avg_goals_for": 1.2308,
+      "avg_goals_against": 1.2564
     },
     "Athletic Club": {
       "matches": 94,
@@ -784,19 +784,19 @@
       "avg_goals_against": 1.8026
     },
     "Everton FC": {
-      "matches": 84,
-      "goals_for": 97,
+      "matches": 85,
+      "goals_for": 98,
       "goals_against": 103,
       "last5": [
-        "D",
         "W",
         "D",
         "L",
-        "L"
+        "L",
+        "W"
       ],
-      "last_match": "2026-10-24T14:00:00Z",
-      "avg_goals_for": 1.1548,
-      "avg_goals_against": 1.2262
+      "last_match": "2026-11-02T20:00:00Z",
+      "avg_goals_for": 1.1529,
+      "avg_goals_against": 1.2118
     },
     "Brighton & Hove Albion FC": {
       "matches": 85,
@@ -814,19 +814,19 @@
       "avg_goals_against": 1.3176
     },
     "Newcastle United FC": {
-      "matches": 96,
+      "matches": 97,
       "goals_for": 162,
-      "goals_against": 134,
+      "goals_against": 135,
       "last5": [
-        "L",
         "W",
         "L",
         "L",
-        "W"
+        "W",
+        "L"
       ],
-      "last_match": "2026-10-25T14:00:00Z",
-      "avg_goals_for": 1.6875,
-      "avg_goals_against": 1.3958
+      "last_match": "2026-11-02T20:00:00Z",
+      "avg_goals_for": 1.6701,
+      "avg_goals_against": 1.3918
     },
     "Southampton FC": {
       "matches": 38,
@@ -964,34 +964,34 @@
       "avg_goals_against": 1.0263
     },
     "Parma Calcio 1913": {
-      "matches": 85,
-      "goals_for": 77,
+      "matches": 86,
+      "goals_for": 80,
       "goals_against": 119,
       "last5": [
-        "W",
         "L",
         "L",
         "L",
-        "D"
+        "D",
+        "W"
       ],
-      "last_match": "2026-10-28T17:30:00Z",
-      "avg_goals_for": 0.9059,
-      "avg_goals_against": 1.4
+      "last_match": "2026-11-02T19:45:00Z",
+      "avg_goals_for": 0.9302,
+      "avg_goals_against": 1.3837
     },
     "ACF Fiorentina": {
-      "matches": 85,
-      "goals_for": 112,
-      "goals_against": 112,
+      "matches": 86,
+      "goals_for": 116,
+      "goals_against": 114,
       "last5": [
+        "L",
+        "L",
+        "L",
         "D",
-        "L",
-        "L",
-        "L",
-        "D"
+        "W"
       ],
-      "last_match": "2026-10-29T19:45:00Z",
-      "avg_goals_for": 1.3176,
-      "avg_goals_against": 1.3176
+      "last_match": "2026-11-02T17:30:00Z",
+      "avg_goals_for": 1.3488,
+      "avg_goals_against": 1.3256
     },
     "Stade de Reims": {
       "matches": 34,
@@ -1024,19 +1024,19 @@
       "avg_goals_against": 1.1333
     },
     "CA Osasuna": {
-      "matches": 86,
-      "goals_for": 102,
-      "goals_against": 122,
+      "matches": 87,
+      "goals_for": 103,
+      "goals_against": 124,
       "last5": [
-        "L",
         "D",
         "L",
         "W",
+        "L",
         "L"
       ],
-      "last_match": "2026-10-26T20:00:00Z",
-      "avg_goals_for": 1.186,
-      "avg_goals_against": 1.4186
+      "last_match": "2026-11-02T20:00:00Z",
+      "avg_goals_for": 1.1839,
+      "avg_goals_against": 1.4253
     },
     "CD Leganés": {
       "matches": 38,
@@ -1579,19 +1579,19 @@
       "avg_goals_against": 1.5
     },
     "Atalanta BC": {
-      "matches": 107,
+      "matches": 108,
       "goals_for": 183,
-      "goals_against": 124,
+      "goals_against": 127,
       "last5": [
-        "L",
         "W",
         "L",
         "D",
-        "D"
+        "D",
+        "L"
       ],
-      "last_match": "2026-10-29T19:45:00Z",
-      "avg_goals_for": 1.7103,
-      "avg_goals_against": 1.1589
+      "last_match": "2026-11-02T19:45:00Z",
+      "avg_goals_for": 1.6944,
+      "avg_goals_against": 1.1759
     },
     "Real Valladolid CF": {
       "matches": 38,
@@ -2194,19 +2194,19 @@
       "avg_goals_against": 1.6176
     },
     "FC Alverca": {
-      "matches": 43,
+      "matches": 44,
       "goals_for": 48,
-      "goals_against": 65,
+      "goals_against": 66,
       "last5": [
+        "W",
+        "W",
+        "W",
         "L",
-        "W",
-        "W",
-        "W",
         "L"
       ],
-      "last_match": "2026-10-24T17:00:00Z",
-      "avg_goals_for": 1.1163,
-      "avg_goals_against": 1.5116
+      "last_match": "2026-11-02T20:15:00Z",
+      "avg_goals_for": 1.0909,
+      "avg_goals_against": 1.5
     },
     "Real Oviedo": {
       "matches": 38,
@@ -2344,19 +2344,19 @@
       "avg_goals_against": 1.5306
     },
     "US Sassuolo Calcio": {
-      "matches": 47,
-      "goals_for": 60,
-      "goals_against": 72,
+      "matches": 48,
+      "goals_for": 62,
+      "goals_against": 76,
       "last5": [
-        "L",
         "D",
+        "L",
         "L",
         "L",
         "L"
       ],
-      "last_match": "2026-10-27T17:30:00Z",
-      "avg_goals_for": 1.2766,
-      "avg_goals_against": 1.5319
+      "last_match": "2026-11-02T17:30:00Z",
+      "avg_goals_for": 1.2917,
+      "avg_goals_against": 1.5833
     },
     "US Cremonese": {
       "matches": 38,
@@ -2629,19 +2629,19 @@
       "avg_goals_against": 2.6364
     },
     "RC Deportivo La Coruña": {
-      "matches": 10,
-      "goals_for": 13,
-      "goals_against": 13,
+      "matches": 11,
+      "goals_for": 15,
+      "goals_against": 14,
       "last5": [
-        "L",
         "D",
         "L",
         "D",
-        "L"
+        "L",
+        "W"
       ],
-      "last_match": "2026-10-24T19:00:00Z",
-      "avg_goals_for": 1.3,
-      "avg_goals_against": 1.3
+      "last_match": "2026-11-02T20:00:00Z",
+      "avg_goals_for": 1.3636,
+      "avg_goals_against": 1.2727
     },
     "Málaga CF": {
       "matches": 11,
