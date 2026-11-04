@@ -1,7 +1,7 @@
 {
   "version": "FEG-MEMORY-0.2",
-  "updated_at": "2026-11-04T06:29:42.564836+00:00",
-  "match_count": 5810,
+  "updated_at": "2026-11-04T19:50:26.515894+00:00",
+  "match_count": 5812,
   "teams": {
     "FC Groningen": {
       "matches": 79,
@@ -739,19 +739,19 @@
       "avg_goals_against": 2.1277
     },
     "Liverpool FC": {
-      "matches": 110,
-      "goals_for": 215,
-      "goals_against": 133,
+      "matches": 111,
+      "goals_for": 217,
+      "goals_against": 136,
       "last5": [
         "W",
         "W",
         "W",
-        "W",
+        "L",
         "L"
       ],
-      "last_match": "2026-11-01T16:30:00Z",
-      "avg_goals_for": 1.9545,
-      "avg_goals_against": 1.2091
+      "last_match": "2026-11-04T17:45:00Z",
+      "avg_goals_for": 1.955,
+      "avg_goals_against": 1.2252
     },
     "Arsenal FC": {
       "matches": 117,
@@ -1549,9 +1549,9 @@
       "avg_goals_against": 1.3289
     },
     "Real Madrid CF": {
-      "matches": 118,
-      "goals_for": 259,
-      "goals_against": 132,
+      "matches": 119,
+      "goals_for": 262,
+      "goals_against": 134,
       "last5": [
         "W",
         "W",
@@ -1559,9 +1559,9 @@
         "W",
         "W"
       ],
-      "last_match": "2026-11-01T15:15:00Z",
-      "avg_goals_for": 2.1949,
-      "avg_goals_against": 1.1186
+      "last_match": "2026-11-04T17:45:00Z",
+      "avg_goals_for": 2.2017,
+      "avg_goals_against": 1.1261
     },
     "US Lecce": {
       "matches": 86,
@@ -2779,17 +2779,18 @@
       "avg_goals_against": 1.125
     },
     "PAE AEK": {
-      "matches": 3,
-      "goals_for": 3,
-      "goals_against": 8,
+      "matches": 4,
+      "goals_for": 5,
+      "goals_against": 11,
       "last5": [
         "W",
         "L",
+        "L",
         "L"
       ],
-      "last_match": "2026-10-20T19:00:00Z",
-      "avg_goals_for": 1.0,
-      "avg_goals_against": 2.6667
+      "last_match": "2026-11-04T17:45:00Z",
+      "avg_goals_for": 1.25,
+      "avg_goals_against": 2.75
     },
     "LASK Linz": {
       "matches": 4,
@@ -2819,17 +2820,18 @@
       "avg_goals_against": 3.0
     },
     "Fenerbahçe SK": {
-      "matches": 3,
-      "goals_for": 3,
-      "goals_against": 9,
+      "matches": 4,
+      "goals_for": 6,
+      "goals_against": 11,
       "last5": [
         "D",
         "L",
-        "D"
+        "D",
+        "W"
       ],
-      "last_match": "2026-10-20T16:45:00Z",
-      "avg_goals_for": 1.0,
-      "avg_goals_against": 3.0
+      "last_match": "2026-11-04T17:45:00Z",
+      "avg_goals_for": 1.5,
+      "avg_goals_against": 2.75
     },
     "Sabah FK": {
       "matches": 3,
