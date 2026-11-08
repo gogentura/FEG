@@ -1,7 +1,7 @@
 {
   "version": "FEG-MEMORY-0.2",
-  "updated_at": "2026-11-08T06:08:09.456555+00:00",
-  "match_count": 5850,
+  "updated_at": "2026-11-08T13:31:18.114751+00:00",
+  "match_count": 5851,
   "teams": {
     "FC Groningen": {
       "matches": 79,
@@ -64,19 +64,19 @@
       "avg_goals_against": 1.7308
     },
     "Feyenoord Rotterdam": {
-      "matches": 95,
-      "goals_for": 204,
-      "goals_against": 131,
+      "matches": 96,
+      "goals_for": 207,
+      "goals_against": 136,
       "last5": [
-        "W",
         "L",
         "D",
         "D",
+        "L",
         "L"
       ],
-      "last_match": "2026-11-03T20:00:00Z",
-      "avg_goals_for": 2.1474,
-      "avg_goals_against": 1.3789
+      "last_match": "2026-11-08T11:15:00Z",
+      "avg_goals_for": 2.1562,
+      "avg_goals_against": 1.4167
     },
     "Willem II Tilburg": {
       "matches": 46,
@@ -409,19 +409,19 @@
       "avg_goals_against": 1.2299
     },
     "SC Heerenveen": {
-      "matches": 79,
-      "goals_for": 118,
-      "goals_against": 123,
+      "matches": 80,
+      "goals_for": 123,
+      "goals_against": 126,
       "last5": [
-        "W",
         "L",
+        "W",
         "W",
         "W",
         "W"
       ],
-      "last_match": "2026-10-31T17:45:00Z",
-      "avg_goals_for": 1.4937,
-      "avg_goals_against": 1.557
+      "last_match": "2026-11-08T11:15:00Z",
+      "avg_goals_for": 1.5375,
+      "avg_goals_against": 1.575
     },
     "SC Farense": {
       "matches": 34,
