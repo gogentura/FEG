@@ -1,7 +1,7 @@
 {
   "version": "FEG-MEMORY-0.2",
-  "updated_at": "2026-11-08T22:11:26.460015+00:00",
-  "match_count": 5882,
+  "updated_at": "2026-11-09T06:38:40.090065+00:00",
+  "match_count": 5884,
   "teams": {
     "FC Groningen": {
       "matches": 80,
@@ -49,19 +49,19 @@
       "avg_goals_against": 0.9143
     },
     "Rio Ave FC": {
-      "matches": 78,
+      "matches": 79,
       "goals_for": 83,
-      "goals_against": 135,
+      "goals_against": 136,
       "last5": [
-        "D",
         "L",
         "W",
         "L",
+        "L",
         "L"
       ],
-      "last_match": "2026-11-01T18:00:00Z",
-      "avg_goals_for": 1.0641,
-      "avg_goals_against": 1.7308
+      "last_match": "2026-11-08T20:30:00Z",
+      "avg_goals_for": 1.0506,
+      "avg_goals_against": 1.7215
     },
     "Feyenoord Rotterdam": {
       "matches": 96,
@@ -469,49 +469,49 @@
       "avg_goals_against": 1.038
     },
     "Sport Lisboa e Benfica": {
-      "matches": 100,
-      "goals_for": 217,
-      "goals_against": 95,
+      "matches": 101,
+      "goals_for": 220,
+      "goals_against": 97,
       "last5": [
-        "W",
         "L",
+        "W",
         "W",
         "W",
         "W"
       ],
-      "last_match": "2026-11-02T20:15:00Z",
-      "avg_goals_for": 2.17,
-      "avg_goals_against": 0.95
+      "last_match": "2026-11-08T20:30:00Z",
+      "avg_goals_for": 2.1782,
+      "avg_goals_against": 0.9604
     },
     "Sporting Clube de Braga": {
-      "matches": 78,
-      "goals_for": 131,
+      "matches": 79,
+      "goals_for": 132,
       "goals_against": 77,
       "last5": [
-        "D",
         "L",
         "L",
         "L",
+        "W",
         "W"
       ],
-      "last_match": "2026-11-01T20:30:00Z",
-      "avg_goals_for": 1.6795,
-      "avg_goals_against": 0.9872
+      "last_match": "2026-11-08T20:30:00Z",
+      "avg_goals_for": 1.6709,
+      "avg_goals_against": 0.9747
     },
     "CF Estrela da Amadora": {
-      "matches": 78,
-      "goals_for": 77,
-      "goals_against": 125,
+      "matches": 79,
+      "goals_for": 79,
+      "goals_against": 128,
       "last5": [
-        "D",
+        "L",
         "L",
         "L",
         "L",
         "L"
       ],
-      "last_match": "2026-10-31T15:30:00Z",
-      "avg_goals_for": 0.9872,
-      "avg_goals_against": 1.6026
+      "last_match": "2026-11-08T20:30:00Z",
+      "avg_goals_for": 1.0,
+      "avg_goals_against": 1.6203
     },
     "FC Arouca": {
       "matches": 79,
