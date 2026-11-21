@@ -1,7 +1,7 @@
 {
   "version": "FEG-MEMORY-0.2",
-  "updated_at": "2026-11-20T20:27:21.774231+00:00",
-  "match_count": 5884,
+  "updated_at": "2026-11-21T07:15:11.133348+00:00",
+  "match_count": 5887,
   "teams": {
     "FC Groningen": {
       "matches": 80,
@@ -544,19 +544,19 @@
       "avg_goals_against": 1.2658
     },
     "Athletic Club": {
-      "matches": 95,
+      "matches": 96,
       "goals_for": 121,
-      "goals_against": 112,
+      "goals_against": 113,
       "last5": [
-        "D",
         "L",
         "W",
         "W",
-        "D"
+        "D",
+        "L"
       ],
-      "last_match": "2026-11-07T17:30:00Z",
-      "avg_goals_for": 1.2737,
-      "avg_goals_against": 1.1789
+      "last_match": "2026-11-20T20:00:00Z",
+      "avg_goals_for": 1.2604,
+      "avg_goals_against": 1.1771
     },
     "Getafe CF": {
       "matches": 88,
@@ -634,9 +634,9 @@
       "avg_goals_against": 1.375
     },
     "Le Havre AC": {
-      "matches": 78,
-      "goals_for": 81,
-      "goals_against": 137,
+      "matches": 79,
+      "goals_for": 82,
+      "goals_against": 140,
       "last5": [
         "L",
         "L",
@@ -644,9 +644,9 @@
         "L",
         "L"
       ],
-      "last_match": "2026-11-08T16:15:00Z",
-      "avg_goals_for": 1.0385,
-      "avg_goals_against": 1.7564
+      "last_match": "2026-11-20T19:45:00Z",
+      "avg_goals_for": 1.038,
+      "avg_goals_against": 1.7722
     },
     "Paris Saint-Germain FC": {
       "matches": 116,
@@ -1609,19 +1609,19 @@
       "avg_goals_against": 2.3684
     },
     "RCD Espanyol de Barcelona": {
-      "matches": 88,
-      "goals_for": 96,
+      "matches": 89,
+      "goals_for": 97,
       "goals_against": 120,
       "last5": [
-        "D",
         "L",
         "L",
         "W",
-        "D"
+        "D",
+        "W"
       ],
-      "last_match": "2026-11-07T15:15:00Z",
-      "avg_goals_for": 1.0909,
-      "avg_goals_against": 1.3636
+      "last_match": "2026-11-20T20:00:00Z",
+      "avg_goals_for": 1.0899,
+      "avg_goals_against": 1.3483
     },
     "Juventus FC": {
       "matches": 107,
@@ -1939,19 +1939,19 @@
       "avg_goals_against": 1.8088
     },
     "FC Bayern München": {
-      "matches": 109,
-      "goals_for": 336,
-      "goals_against": 120,
+      "matches": 110,
+      "goals_for": 337,
+      "goals_against": 121,
       "last5": [
-        "D",
         "W",
         "D",
         "W",
-        "W"
+        "W",
+        "D"
       ],
-      "last_match": "2026-11-07T14:30:00Z",
-      "avg_goals_for": 3.0826,
-      "avg_goals_against": 1.1009
+      "last_match": "2026-11-20T19:30:00Z",
+      "avg_goals_for": 3.0636,
+      "avg_goals_against": 1.1
     },
     "FC St. Pauli 1910": {
       "matches": 68,
@@ -2374,19 +2374,19 @@
       "avg_goals_against": 1.5
     },
     "1. FC Köln": {
-      "matches": 43,
-      "goals_for": 59,
-      "goals_against": 77,
+      "matches": 44,
+      "goals_for": 60,
+      "goals_against": 78,
       "last5": [
-        "W",
         "L",
         "D",
         "D",
-        "L"
+        "L",
+        "D"
       ],
-      "last_match": "2026-11-08T14:30:00Z",
-      "avg_goals_for": 1.3721,
-      "avg_goals_against": 1.7907
+      "last_match": "2026-11-20T19:30:00Z",
+      "avg_goals_for": 1.3636,
+      "avg_goals_against": 1.7727
     },
     "Hamburger SV": {
       "matches": 43,
@@ -2704,19 +2704,19 @@
       "avg_goals_against": 1.9
     },
     "ES Troyes AC": {
-      "matches": 10,
-      "goals_for": 7,
-      "goals_against": 17,
+      "matches": 11,
+      "goals_for": 10,
+      "goals_against": 18,
       "last5": [
-        "L",
         "L",
         "D",
         "W",
-        "L"
+        "L",
+        "W"
       ],
-      "last_match": "2026-11-07T20:05:00Z",
-      "avg_goals_for": 0.7,
-      "avg_goals_against": 1.7
+      "last_match": "2026-11-20T19:45:00Z",
+      "avg_goals_for": 0.9091,
+      "avg_goals_against": 1.6364
     },
     "Frosinone Calcio": {
       "matches": 11,
