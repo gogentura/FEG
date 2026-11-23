@@ -1,7 +1,7 @@
 {
   "version": "FEG-MEMORY-0.2",
-  "updated_at": "2026-11-23T07:45:33.684019+00:00",
-  "match_count": 5938,
+  "updated_at": "2026-11-23T23:58:54.657409+00:00",
+  "match_count": 5941,
   "teams": {
     "FC Groningen": {
       "matches": 81,
@@ -784,19 +784,19 @@
       "avg_goals_against": 1.8026
     },
     "Everton FC": {
-      "matches": 86,
+      "matches": 87,
       "goals_for": 101,
-      "goals_against": 104,
+      "goals_against": 108,
       "last5": [
-        "D",
         "L",
         "L",
         "W",
-        "W"
+        "W",
+        "L"
       ],
-      "last_match": "2026-11-06T20:00:00Z",
-      "avg_goals_for": 1.1744,
-      "avg_goals_against": 1.2093
+      "last_match": "2026-11-23T20:00:00Z",
+      "avg_goals_for": 1.1609,
+      "avg_goals_against": 1.2414
     },
     "Brighton & Hove Albion FC": {
       "matches": 87,
@@ -979,19 +979,19 @@
       "avg_goals_against": 1.4318
     },
     "ACF Fiorentina": {
-      "matches": 87,
+      "matches": 88,
       "goals_for": 118,
-      "goals_against": 116,
+      "goals_against": 119,
       "last5": [
-        "L",
         "L",
         "D",
         "W",
-        "D"
+        "D",
+        "L"
       ],
-      "last_match": "2026-11-08T19:45:00Z",
-      "avg_goals_for": 1.3563,
-      "avg_goals_against": 1.3333
+      "last_match": "2026-11-23T19:45:00Z",
+      "avg_goals_for": 1.3409,
+      "avg_goals_against": 1.3523
     },
     "Stade de Reims": {
       "matches": 34,
@@ -1069,19 +1069,19 @@
       "avg_goals_against": 1.5526
     },
     "AC Monza": {
-      "matches": 49,
-      "goals_for": 45,
+      "matches": 50,
+      "goals_for": 48,
       "goals_against": 94,
       "last5": [
-        "W",
         "L",
         "L",
         "L",
-        "L"
+        "L",
+        "W"
       ],
-      "last_match": "2026-11-08T14:00:00Z",
-      "avg_goals_for": 0.9184,
-      "avg_goals_against": 1.9184
+      "last_match": "2026-11-23T19:45:00Z",
+      "avg_goals_for": 0.96,
+      "avg_goals_against": 1.88
     },
     "AC Milan": {
       "matches": 98,
@@ -1174,19 +1174,19 @@
       "avg_goals_against": 1.1765
     },
     "Brentford FC": {
-      "matches": 86,
-      "goals_for": 137,
+      "matches": 87,
+      "goals_for": 141,
       "goals_against": 120,
       "last5": [
-        "D",
         "L",
         "D",
         "W",
-        "L"
+        "L",
+        "W"
       ],
-      "last_match": "2026-11-08T14:00:00Z",
-      "avg_goals_for": 1.593,
-      "avg_goals_against": 1.3953
+      "last_match": "2026-11-23T20:00:00Z",
+      "avg_goals_for": 1.6207,
+      "avg_goals_against": 1.3793
     },
     "Crystal Palace FC": {
       "matches": 87,
@@ -2254,19 +2254,19 @@
       "avg_goals_against": 1.9737
     },
     "Levante UD": {
-      "matches": 50,
-      "goals_for": 63,
-      "goals_against": 82,
+      "matches": 51,
+      "goals_for": 64,
+      "goals_against": 83,
       "last5": [
-        "D",
         "W",
         "L",
         "L",
+        "D",
         "D"
       ],
-      "last_match": "2026-11-08T17:30:00Z",
-      "avg_goals_for": 1.26,
-      "avg_goals_against": 1.64
+      "last_match": "2026-11-23T20:00:00Z",
+      "avg_goals_for": 1.2549,
+      "avg_goals_against": 1.6275
     },
     "FC Lorient": {
       "matches": 45,
@@ -2329,19 +2329,19 @@
       "avg_goals_against": 1.3265
     },
     "Elche CF": {
-      "matches": 50,
-      "goals_for": 63,
-      "goals_against": 77,
+      "matches": 51,
+      "goals_for": 64,
+      "goals_against": 78,
       "last5": [
-        "D",
         "D",
         "W",
         "L",
-        "L"
+        "L",
+        "D"
       ],
-      "last_match": "2026-11-08T13:00:00Z",
-      "avg_goals_for": 1.26,
-      "avg_goals_against": 1.54
+      "last_match": "2026-11-23T20:00:00Z",
+      "avg_goals_for": 1.2549,
+      "avg_goals_against": 1.5294
     },
     "US Sassuolo Calcio": {
       "matches": 50,
