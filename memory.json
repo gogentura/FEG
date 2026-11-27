@@ -1,22 +1,22 @@
 {
   "version": "FEG-MEMORY-0.2",
-  "updated_at": "2026-11-27T08:40:59.554209+00:00",
-  "match_count": 5959,
+  "updated_at": "2026-11-27T21:23:00.759029+00:00",
+  "match_count": 5960,
   "teams": {
     "FC Groningen": {
-      "matches": 81,
-      "goals_for": 119,
-      "goals_against": 129,
+      "matches": 82,
+      "goals_for": 120,
+      "goals_against": 130,
       "last5": [
-        "L",
         "D",
         "L",
         "L",
-        "L"
+        "L",
+        "D"
       ],
-      "last_match": "2026-11-21T20:00:00Z",
-      "avg_goals_for": 1.4691,
-      "avg_goals_against": 1.5926
+      "last_match": "2026-11-27T19:00:00Z",
+      "avg_goals_for": 1.4634,
+      "avg_goals_against": 1.5854
     },
     "NAC Breda": {
       "matches": 68,
@@ -79,19 +79,19 @@
       "avg_goals_against": 1.4286
     },
     "Willem II Tilburg": {
-      "matches": 47,
-      "goals_for": 46,
-      "goals_against": 98,
+      "matches": 48,
+      "goals_for": 47,
+      "goals_against": 99,
       "last5": [
         "L",
         "L",
-        "L",
         "D",
-        "L"
+        "L",
+        "D"
       ],
-      "last_match": "2026-11-22T11:15:00Z",
-      "avg_goals_for": 0.9787,
-      "avg_goals_against": 2.0851
+      "last_match": "2026-11-27T19:00:00Z",
+      "avg_goals_for": 0.9792,
+      "avg_goals_against": 2.0625
     },
     "AVS": {
       "matches": 68,
